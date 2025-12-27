@@ -1,0 +1,4 @@
+name: Snowsplash
+version: '1.0-SNAPSHOT'
+main: com.liphium.snowsplash.Snowsplash
+api-version: '1.21'
