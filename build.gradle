@@ -12,11 +12,12 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
+    maven { url = "https://repo.onarandombox.com/content/groups/public/" }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly 'com.onarandombox.multiversecore:multiverse-core:5.4.0'
+    compileOnly 'org.mvplugins.multiverse.core:multiverse-core:5.4.0'
 }
 
 tasks {

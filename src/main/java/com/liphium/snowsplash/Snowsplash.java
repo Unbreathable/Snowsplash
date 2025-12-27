@@ -1,8 +1,24 @@
 package com.liphium.snowsplash;
 
+import com.liphium.core.Core;
+import com.liphium.snowsplash.command.SetCommand;
+import com.liphium.snowsplash.command.TimerCommand;
+import com.liphium.snowsplash.game.GameManager;
+import com.liphium.snowsplash.listener.ChatListener;
+import com.liphium.snowsplash.listener.GameListener;
+import com.liphium.snowsplash.listener.JoinQuitListener;
+import com.liphium.snowsplash.listener.machines.MachineManager;
+import com.liphium.snowsplash.screens.BrewingScreen;
+import com.liphium.snowsplash.screens.ItemShopScreen;
+import com.liphium.snowsplash.screens.TeamSelectionScreen;
+import com.liphium.snowsplash.util.TaskManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mvplugins.multiverse.core.MultiverseCoreApi;
+import org.mvplugins.multiverse.core.world.options.CloneWorldOptions;
+import org.mvplugins.multiverse.core.world.options.DeleteWorldOptions;
 
 public final class Snowsplash extends JavaPlugin {
 
@@ -13,14 +29,69 @@ public final class Snowsplash extends JavaPlugin {
 
     private static Snowsplash instance;
 
+    private MultiverseCoreApi core;
+
+    private TaskManager taskManager;
+
+    private GameManager gameManager;
+
+    private MachineManager machineManager;
+
+    public static String GAME_WORLD = "game";
+
     @Override
     public void onEnable() {
         instance = this;
+        Core.init();
+
+        // Initialize multiverse core and stuff
+        core = MultiverseCoreApi.get();
+        assert core != null;
+        getLogger().info("Creating world for the game...");
+        core.getWorldManager().getLoadedWorld("world").peek(world -> {
+            core.getWorldManager().cloneWorld(CloneWorldOptions.fromTo(world, GAME_WORLD))
+                    .onSuccess(() -> {
+                        getLogger().info("Successfully created the game world.");
+                    });
+        });
+
+        taskManager = new TaskManager();
+        taskManager.initTask();
+
+        machineManager = new MachineManager();
+
+        gameManager = new GameManager();
+
+        Listener[] listeners = new Listener[]{new GameListener(), new ChatListener(), new JoinQuitListener()};
+        for (Listener listener : listeners) {
+            getServer().getPluginManager().registerEvents(listener, this);
+        }
+
+        getCommand("set").setExecutor(new SetCommand());
+        getCommand("timer").setExecutor(new TimerCommand());
+
+        Core.getInstance().getScreens().register(new TeamSelectionScreen(), new BrewingScreen(), new ItemShopScreen());
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        core.getWorldManager().getWorld(GAME_WORLD).peek(world -> {
+            core.getWorldManager().deleteWorld(DeleteWorldOptions.world(world)).onSuccess(() -> {
+                getLogger().info("Successfully deleted the game world.");
+            });
+        });
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
+    }
+
+    public MachineManager getMachineManager() {
+        return machineManager;
+    }
+
+    public TaskManager getTaskManager() {
+        return taskManager;
     }
 
     public static Snowsplash getInstance() {
