@@ -5,13 +5,7 @@ import com.liphium.core.particle.ParticleShape;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-public class CircleShape implements ParticleShape {
-
-    private final int radius;
-
-    public CircleShape(int radius) {
-        this.radius = radius;
-    }
+public record CircleShape(int radius) implements ParticleShape {
 
     @Override
     public void renderShape(Player player, Location[] locations, ParticleBuilder builder) {
@@ -25,9 +19,5 @@ public class CircleShape implements ParticleShape {
             particleLoc.setZ(center.getZ() + Math.sin(i * 2) * radius);
             builder.getRenderer().renderParticle(player, particleLoc);
         }
-    }
-
-    public int getRadius() {
-        return radius;
     }
 }

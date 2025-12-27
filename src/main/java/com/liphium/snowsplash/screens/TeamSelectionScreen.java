@@ -13,54 +13,31 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 public class TeamSelectionScreen extends CScreen {
 
-	public TeamSelectionScreen() {
-		super(
-			1,
-			Component.text(
-				"Teams",
-				NamedTextColor.DARK_AQUA,
-				TextDecoration.BOLD
-			),
-			3,
-			true
-		);
-		background();
-		rebuild();
-	}
+    public TeamSelectionScreen() {
+        super(1, Component.text("Teams", NamedTextColor.DARK_AQUA, TextDecoration.BOLD), 3, true);
+        background();
+        rebuild();
+    }
 
-	public void rebuild() {
-		// 9 10 11 12 13 14 15 16 17
-		for (Team team : Snowsplash.getInstance()
-			.getGameManager()
-			.getTeamManager()
-			.getTeams()) {
-			int slot = team instanceof HunterTeam ? 10 : 16;
+    public void rebuild() {
+        // 9 10 11 12 13 14 15 16 17
+        for (Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
+            int slot = team instanceof HunterTeam ? 10 : 16;
 
-			setItem(
-				slot,
-				new CItem(
-					new ItemStackBuilder(team.getMaterial())
-						.withLore(team.playerLore())
-						.withName(Component.text(team.getName()))
-						.buildStack()
-				).onClick(event -> click(team, event))
-			);
-		}
-	}
+            setItem(slot, new CItem(new ItemStackBuilder(team.getMaterial()).withLore(team.playerLore()).withName(Component.text(team.getName())).buildStack()).onClick(event -> click(team, event)));
+        }
+    }
 
-	public void click(Team team, CClickEvent event) {
-		if (team.getPlayers().contains(event.getPlayer())) {
-			team.getPlayers().remove(event.getPlayer());
-		} else {
-			for (Team t : Snowsplash.getInstance()
-				.getGameManager()
-				.getTeamManager()
-				.getTeams()) {
-				t.getPlayers().remove(event.getPlayer());
-			}
-			team.addPlayer(event.getPlayer());
-		}
+    public void click(Team team, CClickEvent event) {
+        if (team.getPlayers().contains(event.player())) {
+            team.getPlayers().remove(event.player());
+        } else {
+            for (Team t : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
+                t.getPlayers().remove(event.player());
+            }
+            team.addPlayer(event.player());
+        }
 
-		rebuild();
-	}
+        rebuild();
+    }
 }

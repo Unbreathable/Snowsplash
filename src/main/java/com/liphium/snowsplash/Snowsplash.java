@@ -22,10 +22,7 @@ import org.mvplugins.multiverse.core.world.options.DeleteWorldOptions;
 
 public final class Snowsplash extends JavaPlugin {
 
-    public static final Component PREFIX = Component.text("[", NamedTextColor.DARK_GRAY)
-            .append(Component.text("Snowsplash", NamedTextColor.AQUA))
-            .append(Component.text("]", NamedTextColor.DARK_GRAY))
-            .append(Component.text(" "));
+    public static final Component PREFIX = Component.text("[", NamedTextColor.DARK_GRAY).append(Component.text("Snowsplash", NamedTextColor.AQUA)).append(Component.text("]", NamedTextColor.DARK_GRAY)).append(Component.text(" "));
 
     private static Snowsplash instance;
 
@@ -49,10 +46,9 @@ public final class Snowsplash extends JavaPlugin {
         assert core != null;
         getLogger().info("Creating world for the game...");
         core.getWorldManager().getLoadedWorld("world").peek(world -> {
-            core.getWorldManager().cloneWorld(CloneWorldOptions.fromTo(world, GAME_WORLD))
-                    .onSuccess(() -> {
-                        getLogger().info("Successfully created the game world.");
-                    });
+            core.getWorldManager().cloneWorld(CloneWorldOptions.fromTo(world, GAME_WORLD)).onSuccess(() -> {
+                getLogger().info("Successfully created the game world.");
+            });
         });
 
         taskManager = new TaskManager();

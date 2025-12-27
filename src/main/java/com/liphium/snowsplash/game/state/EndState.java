@@ -48,11 +48,7 @@ public class EndState extends GameState {
                     tickCount = 0;
                     if (!paused) count--;
 
-                    Messages.actionBar(Component.text("Stoppen ", NamedTextColor.RED)
-                            .append(Component.text("in ", NamedTextColor.GRAY))
-                            .append(Component.text(count, NamedTextColor.RED, TextDecoration.BOLD))
-                            .append(Component.text("..", NamedTextColor.GRAY))
-                    );
+                    Messages.actionBar(Component.text("Stoppen ", NamedTextColor.RED).append(Component.text("in ", NamedTextColor.GRAY)).append(Component.text(count, NamedTextColor.RED, TextDecoration.BOLD)).append(Component.text("..", NamedTextColor.GRAY)));
 
                     if (count == 0) {
                         Bukkit.shutdown();

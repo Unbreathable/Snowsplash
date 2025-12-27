@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class ItemDropper extends Machine {
 
-    private UUID uniqueId;
+    private final UUID uniqueId;
     private final String name;
     private final NamedTextColor color;
     private final ItemStack toDrop;
@@ -32,8 +32,7 @@ public class ItemDropper extends Machine {
         ArmorStand stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
 
         stand.setCustomNameVisible(true);
-        stand.customName(Component.text(name, color).appendSpace()
-                .append(Component.text("production happens here.", NamedTextColor.GRAY)));
+        stand.customName(Component.text(name, color).appendSpace().append(Component.text("production happens here.", NamedTextColor.GRAY)));
         stand.setGravity(false);
         stand.setInvisible(true);
         stand.setInvulnerable(true);
@@ -53,16 +52,12 @@ public class ItemDropper extends Machine {
             tickCount = 0;
 
             final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-            if(stand == null) {
+            if (stand == null) {
                 return;
             }
 
             count--;
-            stand.customName(Component.text(name, color).appendSpace()
-                    .append(Component.text("in", NamedTextColor.GRAY)).appendSpace()
-                    .append(Component.text(count, color, TextDecoration.BOLD)).appendSpace()
-                    .append(Component.text("..", NamedTextColor.GRAY))
-            );
+            stand.customName(Component.text(name, color).appendSpace().append(Component.text("in", NamedTextColor.GRAY)).appendSpace().append(Component.text(count, color, TextDecoration.BOLD)).appendSpace().append(Component.text("..", NamedTextColor.GRAY)));
 
             if (count == 0) {
                 count = dropRate;
@@ -76,7 +71,7 @@ public class ItemDropper extends Machine {
     @Override
     public void destroy() {
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
         stand.remove();

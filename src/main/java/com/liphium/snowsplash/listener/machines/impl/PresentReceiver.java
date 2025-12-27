@@ -22,18 +22,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class PresentReceiver extends Machine {
 
-    private UUID uniqueId;
-    private static final ArrayList<String> names = new ArrayList<>(List.of(
-            "Julian", "Thorben", "Crash", "Jonas", "Shadow", "Tim",
-            "Atlas", "Animo", "Louis", "Liph", "Ritso", "Glaze", "Jumbo",
-            "JuliPvP99", "Night", "Maya", "Theo", "Prime", "Lofi Girl", "Alex",
-            "Steve", "Arch", "Colin", "Dani", "Dave", "David", "Eric", "Lofi Boy",
-            "Matt", "Elon Musk", "Linus LTT", "Neko", "Ben Dover", "CD", "CI/CD",
-            "Maja"
-    ));
+    private final UUID uniqueId;
+    private static final ArrayList<String> names = new ArrayList<>(List.of("Julian", "Thorben", "Crash", "Jonas", "Shadow", "Tim", "Atlas", "Animo", "Louis", "Liph", "Ritso", "Glaze", "Jumbo", "JuliPvP99", "Night", "Maya", "Theo", "Prime", "Lofi Girl", "Alex", "Steve", "Arch", "Colin", "Dani", "Dave", "David", "Eric", "Lofi Boy", "Matt", "Elon Musk", "Linus LTT", "Neko", "Ben Dover", "CD", "CI/CD", "Maja"));
 
     /**
      * Generate a random name for a present receiver.
+     *
      * @return The random name
      */
     public static String randomName() {
@@ -77,13 +71,14 @@ public class PresentReceiver extends Machine {
 
     /**
      * Change the name of the armor stand to the specified name.
+     *
      * @param name Name to change to
      */
     public void assignName(String name) {
         chosenName = name;
 
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
 
@@ -93,12 +88,12 @@ public class PresentReceiver extends Machine {
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
 
         if (event.getRightClicked().equals(stand)) {
-            if(Snowsplash.getInstance().getGameManager().getCurrentState() instanceof IngameState state) {
+            if (Snowsplash.getInstance().getGameManager().getCurrentState() instanceof IngameState state) {
                 state.onReceiverClicked(event.getPlayer(), chosenName);
             }
             event.setCancelled(true);
@@ -108,7 +103,7 @@ public class PresentReceiver extends Machine {
     @Override
     public void destroy() {
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
         stand.remove();

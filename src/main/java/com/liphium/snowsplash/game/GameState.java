@@ -29,7 +29,8 @@ public abstract class GameState {
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
     }
 
-    public void onEntityExplode(EntityExplodeEvent event) {}
+    public void onEntityExplode(EntityExplodeEvent event) {
+    }
 
     public void onMove(PlayerMoveEvent event) {
     }

@@ -6,7 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -182,7 +181,7 @@ public class ItemStackBuilder {
     public class SkullBuilder {
 
         // Fundamentals
-        private ItemStackBuilder stackBuilder;
+        private final ItemStackBuilder stackBuilder;
 
         // Meta
         private String owner;
@@ -204,9 +203,7 @@ public class ItemStackBuilder {
          */
         public ItemStack buildSkull() {
             // Build the stack first, edit to make sure it's a skull
-            ItemStack skull = stackBuilder
-                    .asMaterial(Material.PLAYER_HEAD)
-                    .buildStack();
+            ItemStack skull = stackBuilder.asMaterial(Material.PLAYER_HEAD).buildStack();
 
             // Edit skull meta
             SkullMeta meta = (SkullMeta) skull.getItemMeta();

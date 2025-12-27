@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class PresentGiver extends Machine {
 
-    private UUID uniqueId;
+    private final UUID uniqueId;
 
     public PresentGiver(Location location) {
         super(location, false);
@@ -56,12 +56,12 @@ public class PresentGiver extends Machine {
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
 
         if (event.getRightClicked().equals(stand)) {
-            if(Snowsplash.getInstance().getGameManager().getCurrentState() instanceof IngameState state) {
+            if (Snowsplash.getInstance().getGameManager().getCurrentState() instanceof IngameState state) {
                 state.onGiverClicked(event.getPlayer());
             }
             event.setCancelled(true);
@@ -71,7 +71,7 @@ public class PresentGiver extends Machine {
     @Override
     public void destroy() {
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
         stand.remove();

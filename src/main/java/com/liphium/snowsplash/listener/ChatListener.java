@@ -17,14 +17,9 @@ public class ChatListener implements Listener {
         Team team = Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
         event.setCancelled(true);
         if (team == null) {
-            Bukkit.broadcast(Component.text(event.getPlayer().getName(), NamedTextColor.GRAY, TextDecoration.ITALIC)
-                    .append(Component.text(": ", NamedTextColor.DARK_GRAY))
-                    .append(event.message().color(NamedTextColor.GRAY))
-            );
+            Bukkit.broadcast(Component.text(event.getPlayer().getName(), NamedTextColor.GRAY, TextDecoration.ITALIC).append(Component.text(": ", NamedTextColor.DARK_GRAY)).append(event.message().color(NamedTextColor.GRAY)));
         } else {
-            Bukkit.broadcast(Component.text(team.getCc() + event.getPlayer().getName(), NamedTextColor.GRAY)
-                    .append(Component.text(": ", NamedTextColor.DARK_GRAY))
-                    .append(event.message().color(NamedTextColor.GRAY)));
+            Bukkit.broadcast(Component.text(team.getCc() + event.getPlayer().getName(), NamedTextColor.GRAY).append(Component.text(": ", NamedTextColor.DARK_GRAY)).append(event.message().color(NamedTextColor.GRAY)));
         }
     }
 

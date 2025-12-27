@@ -19,7 +19,7 @@ import java.util.UUID;
 
 public class RocketDropper extends Machine {
 
-    private UUID uniqueId;
+    private final UUID uniqueId;
 
     public RocketDropper(Location location) {
         super(location, true);
@@ -27,8 +27,7 @@ public class RocketDropper extends Machine {
         ArmorStand stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
 
         stand.setCustomNameVisible(true);
-        stand.customName(Component.text("Rockets", NamedTextColor.RED).appendSpace()
-                .append(Component.text("are produced here.", NamedTextColor.GRAY)));
+        stand.customName(Component.text("Rockets", NamedTextColor.RED).appendSpace().append(Component.text("are produced here.", NamedTextColor.GRAY)));
         stand.setGravity(false);
         stand.setInvisible(true);
         stand.setInvulnerable(true);
@@ -49,16 +48,12 @@ public class RocketDropper extends Machine {
             tickCount = 0;
 
             final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-            if(stand == null) {
+            if (stand == null) {
                 return;
             }
 
             count--;
-            stand.customName(Component.text("Rocket", NamedTextColor.RED).appendSpace()
-                    .append(Component.text("in", NamedTextColor.GRAY)).appendSpace()
-                    .append(Component.text(count, NamedTextColor.RED, TextDecoration.BOLD)).appendSpace()
-                    .append(Component.text("..", NamedTextColor.GRAY))
-            );
+            stand.customName(Component.text("Rocket", NamedTextColor.RED).appendSpace().append(Component.text("in", NamedTextColor.GRAY)).appendSpace().append(Component.text(count, NamedTextColor.RED, TextDecoration.BOLD)).appendSpace().append(Component.text("..", NamedTextColor.GRAY)));
 
             if (count == 0) {
                 count = 20;
@@ -78,7 +73,7 @@ public class RocketDropper extends Machine {
     @Override
     public void destroy() {
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
         stand.remove();

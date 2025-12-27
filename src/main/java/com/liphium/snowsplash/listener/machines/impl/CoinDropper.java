@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class CoinDropper extends Machine {
 
-    private UUID uniqueId;
+    private final UUID uniqueId;
 
     public CoinDropper(Location location, boolean breakable) {
         super(location, breakable);
@@ -32,8 +32,7 @@ public class CoinDropper extends Machine {
         uniqueId = stand.getUniqueId();
 
         stand.setCustomNameVisible(true);
-        stand.customName(Component.text("Coins", NamedTextColor.GOLD).appendSpace()
-                .append(Component.text("are produced here.", NamedTextColor.GRAY)));
+        stand.customName(Component.text("Coins", NamedTextColor.GOLD).appendSpace().append(Component.text("are produced here.", NamedTextColor.GRAY)));
         stand.setGravity(false);
         stand.setInvisible(true);
         stand.setInvulnerable(true);
@@ -45,7 +44,7 @@ public class CoinDropper extends Machine {
     @Override
     public void destroy() {
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
         stand.remove();
@@ -60,16 +59,12 @@ public class CoinDropper extends Machine {
         if (tickCount++ >= 20) {
             tickCount = 0;
             final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-            if(stand == null) {
+            if (stand == null) {
                 return;
             }
 
             count--;
-            stand.customName(Component.text("Coin", NamedTextColor.GOLD).appendSpace()
-                    .append(Component.text("in", NamedTextColor.GRAY)).appendSpace()
-                    .append(Component.text(count, NamedTextColor.GOLD, TextDecoration.BOLD))
-                    .append(Component.text("..", NamedTextColor.GRAY))
-            );
+            stand.customName(Component.text("Coin", NamedTextColor.GOLD).appendSpace().append(Component.text("in", NamedTextColor.GRAY)).appendSpace().append(Component.text(count, NamedTextColor.GOLD, TextDecoration.BOLD)).append(Component.text("..", NamedTextColor.GRAY)));
 
             if (count == 0) {
                 count = computeCount();

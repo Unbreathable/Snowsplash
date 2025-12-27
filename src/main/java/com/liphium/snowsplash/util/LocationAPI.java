@@ -44,8 +44,7 @@ public class LocationAPI {
         // Make the location
         Location location = Snowsplash.getInstance().getConfig().getLocation(locationName);
 
-        if (location != null)
-            location.setWorld(Bukkit.getWorld(Snowsplash.GAME_WORLD));
+        if (location != null) location.setWorld(Bukkit.getWorld(Snowsplash.GAME_WORLD));
 
         // Cache the location for use in the future
         locations.put(locationName, location);

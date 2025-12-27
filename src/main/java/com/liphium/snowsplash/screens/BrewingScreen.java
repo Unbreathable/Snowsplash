@@ -19,43 +19,35 @@ public class BrewingScreen extends CScreen {
 
         background();
 
-        PotionType[] potions = new PotionType[]{
-                PotionType.SWIFTNESS,
-                PotionType.STRONG_LEAPING,
-                PotionType.LONG_REGENERATION,
-        };
+        PotionType[] potions = new PotionType[]{PotionType.SWIFTNESS, PotionType.STRONG_LEAPING, PotionType.LONG_REGENERATION,};
 
         // 9 10 11 12 13 14 15 16 17
         int count = 0;
         for (PotionType data : potions) {
 
             // Build potion
-            ItemStack itemStack = new ItemStackBuilder(Material.LINGERING_POTION)
-                    .withName(Component.text(convertToReadable(data.name()), NamedTextColor.GOLD).appendSpace()
-                            .append(Component.text("potion", NamedTextColor.GRAY)))
-                    .buildStack();
+            ItemStack itemStack = new ItemStackBuilder(Material.LINGERING_POTION).withName(Component.text(convertToReadable(data.name()), NamedTextColor.GOLD).appendSpace().append(Component.text("potion", NamedTextColor.GRAY))).buildStack();
             PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
             meta.setBasePotionType(data);
             itemStack.setItemMeta(meta);
 
             setItem(12 + count, new CItem(itemStack).onClick(event -> {
-                Brewer brewer = Brewer.clickedBrewer.get(event.getPlayer());
+                Brewer brewer = Brewer.clickedBrewer.get(event.player());
                 // Build potion
                 ItemStack potion = new ItemStack(Material.LINGERING_POTION);
                 PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
                 potionMeta.setBasePotionType(data);
-                potionMeta.displayName(Component.text(convertToReadable(data.name()), NamedTextColor.GOLD).appendSpace()
-                        .append(Component.text("potion", NamedTextColor.GRAY)));
+                potionMeta.displayName(Component.text(convertToReadable(data.name()), NamedTextColor.GOLD).appendSpace().append(Component.text("potion", NamedTextColor.GRAY)));
                 potion.setItemMeta(potionMeta);
 
                 if (brewer.currentPotion != null) {
-                    event.getPlayer().closeInventory();
-                    event.getPlayer().sendMessage(Component.text("A potion is already being produced.", NamedTextColor.RED));
+                    event.player().closeInventory();
+                    event.player().sendMessage(Component.text("A potion is already being produced.", NamedTextColor.RED));
                     return;
                 }
 
                 brewer.currentPotion = potion;
-                event.getPlayer().closeInventory();
+                event.player().closeInventory();
             }));
             count++;
         }

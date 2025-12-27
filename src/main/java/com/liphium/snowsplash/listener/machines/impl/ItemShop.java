@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class ItemShop extends Machine {
 
-    private UUID uniqueId;
+    private final UUID uniqueId;
 
     public ItemShop(Location location) {
         super(location, false);
@@ -56,7 +56,7 @@ public class ItemShop extends Machine {
     @Override
     public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
 
@@ -65,10 +65,11 @@ public class ItemShop extends Machine {
             event.setCancelled(true);
         }
     }
+
     @Override
     public void destroy() {
         final var stand = (ArmorStand) location.getWorld().getEntity(uniqueId);
-        if(stand == null) {
+        if (stand == null) {
             return;
         }
         stand.remove();
