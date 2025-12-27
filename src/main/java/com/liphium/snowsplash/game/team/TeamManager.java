@@ -1,7 +1,8 @@
 package com.liphium.snowsplash.game.team;
 
-import com.liphium.snowsplash.game.team.impl.ElfTeam;
-import com.liphium.snowsplash.game.team.impl.HunterTeam;
+import com.liphium.snowsplash.game.team.impl.ColoredTeam;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -13,8 +14,8 @@ public class TeamManager {
     public TeamManager() {
 
         // Register teams
-        teams.add(new ElfTeam());
-        teams.add(new HunterTeam());
+        teams.add(new ColoredTeam("Red", NamedTextColor.RED, Material.RED_WOOL));
+        teams.add(new ColoredTeam("Blue", NamedTextColor.BLUE, Material.BLUE_WOOL));
     }
 
     public Team getTeam(String name) {

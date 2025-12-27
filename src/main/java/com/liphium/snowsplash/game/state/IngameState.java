@@ -4,8 +4,8 @@ import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.snowsplash.Snowsplash;
 import com.liphium.snowsplash.game.GameState;
 import com.liphium.snowsplash.game.team.Team;
-import com.liphium.snowsplash.game.team.impl.ElfTeam;
-import com.liphium.snowsplash.game.team.impl.HunterTeam;
+import com.liphium.snowsplash.game.team.impl.ColoredTeam;
+import com.liphium.snowsplash.listener.machines.impl.DestroyableSnowman;
 import com.liphium.snowsplash.listener.machines.impl.PresentReceiver;
 import com.liphium.snowsplash.util.LocationAPI;
 import com.liphium.snowsplash.util.Messages;
@@ -16,6 +16,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.Snow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -36,7 +37,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class IngameState extends GameState {
 
@@ -44,50 +44,47 @@ public class IngameState extends GameState {
 
     private Runnable runnable;
 
+    private static final double SNOWMAN_HEALTH = 300;
+
     public IngameState() {
         super("In game", 30);
     }
 
-    private int presentsLeft = 0;
-    private final HashMap<String, PresentReceiver> receivers = new HashMap<>();
+    private final HashMap<String, DestroyableSnowman> snowmen = new HashMap<>();
     private final HashMap<Location, Boolean> placedBlocks = new HashMap<>();
-    private final HashMap<Player, String> currentDelivery = new HashMap<>();
 
     @Override
     public void start() {
+
         // World cleanup
-        for (Entity entity : Objects.requireNonNull(Bukkit.getWorld("elfhunt")).getEntities()) {
+        for (Entity entity : Objects.requireNonNull(Bukkit.getWorld(Snowsplash.GAME_WORLD)).getEntities()) {
             if (entity.getType() != EntityType.ARMOR_STAND && entity.getType() != EntityType.PLAYER) entity.remove();
         }
 
-        // Change the amount of presents based on team size
-        final var hunterSize = Snowsplash.getInstance().getGameManager().getTeamManager().getTeam("Elves").getPlayers().size();
-        int maxPresents = hunterSize * 4; // 4 per member of the team seems fine for 15 minutes
-        presentsLeft = maxPresents;
+        // Place all the snowmen
+        for(Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
+            final var location = LocationAPI.getLocation(team.getName() + "-Snowman");
+            final var man = new DestroyableSnowman(location, SNOWMAN_HEALTH);
 
-        // Give every single present receiver a random name
-        for (PresentReceiver receiver : Snowsplash.getInstance().getMachineManager().getMachines(PresentReceiver.class)) {
-            var name = PresentReceiver.randomName();
-            while (receivers.containsKey(name)) {
-                name = PresentReceiver.randomName();
-            }
-            receiver.assignName(name);
-            receivers.put(name, receiver);
+            Snowsplash.getInstance().getMachineManager().addMachine(man);
+            snowmen.put(team.getName(), man);
         }
 
+        // Initialize all the teams
         for (Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
             team.sendStartMessage();
 
             for (Player player : team.getPlayers()) {
                 player.getInventory().clear();
                 player.setHealth(20);
+                player.setFoodLevel(20);
                 team.giveKit(player, true);
             }
         }
 
+        // Start the game loop
         Snowsplash.getInstance().getTaskManager().inject(runnable = new Runnable() {
             int tickCount = 0;
-            int countdown = 20 * 60 * 15; // 15 minutes in ticks
 
             @Override
             public void run() {
@@ -97,26 +94,21 @@ public class IngameState extends GameState {
                 if (tickCount++ >= 20) {
                     tickCount = 0;
 
-                    // Check if the win condition for the hunters is met
-                    if (countdown <= 0) {
-                        handleWin(Snowsplash.getInstance().getGameManager().getTeamManager().getTeam("Hunters"));
-                        return;
+                    // Create an action bar with a health bar for the snowmen of all teams
+                    var base = Component.text("");
+                    var index = 0;
+                    for(Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
+                        base = base.append(snowmen.get(team.getName()).colorWithHealth("■■■■■■■■", team.getColor(), NamedTextColor.GRAY));
+                        if(index != Snowsplash.getInstance().getGameManager().getTeamManager().getTeams().size() - 1) {
+                            base = base.appendSpace().append(Component.text("|", NamedTextColor.DARK_GRAY)).appendSpace();
+                        }
+                        index++;
                     }
 
-                    Messages.actionBar(Component.text(presentsLeft, NamedTextColor.AQUA).append(Component.text("/", NamedTextColor.GRAY)).append(Component.text(maxPresents, NamedTextColor.AQUA)).appendSpace().append(Component.text("remaining", NamedTextColor.GRAY)).appendSpace().append(Component.text("|", NamedTextColor.DARK_GRAY)).appendSpace().append(formatTicks(countdown)).appendSpace().append(Component.text("left", NamedTextColor.GRAY)));
+                    Messages.actionBar(base);
                 }
-
-                countdown--;
             }
         });
-    }
-
-    private Component formatTicks(int ticks) {
-        int totalSeconds = ticks / 20; // 20 ticks = 1 second
-        int minutes = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
-
-        return Component.text(String.format("%02d", minutes), NamedTextColor.AQUA).append(Component.text(":", NamedTextColor.GRAY)).append(Component.text(String.format("%02d", seconds), NamedTextColor.AQUA));
     }
 
     @Override
@@ -168,66 +160,6 @@ public class IngameState extends GameState {
 
         if (event.getRightClicked().getType().equals(EntityType.ARMOR_STAND)) {
             event.setCancelled(true);
-        }
-    }
-
-    private Component buildMessage(String template, String playerName) {
-        String[] parts = template.split("%player%");
-        Component result = Component.text(parts[0], NamedTextColor.GRAY);
-        if (parts.length > 1) {
-            result = result.append(Component.text(playerName, NamedTextColor.AQUA)).append(Component.text(parts[1], NamedTextColor.GRAY));
-        }
-        return result;
-    }
-
-    private final ArrayList<String> messages = new ArrayList<>(List.of("How dare you deliver this to me? This present is for %player%!", "Are you too stupid to read? The name on the present clearly says %player%!", "Why are you giving me this? It's clearly for %player%!", "I don't want this! This belongs to %player%!", "Is there something wrong with your eyes? This is meant for %player%!", "I'm not %player%! Take this to the right person!", "Seriously? This is for %player%, not me!", "You've got the wrong person! This is for %player%!", "Don't waste my time! This clearly says it's for %player%!", "I think you're lost — this is meant for %player%!", "Stop being careless! This is for %player%, not me!", "Do I look like %player% to you? Are you blind?", "This isn't mine — it's for %player%!", "Take a closer look. This belongs to %player%!", "How can you mix this up? It's clearly for %player%!", "Not my name on the present—it's %player%'s!", "This isn't funny. Give this to %player%!", "Read the label! It's for %player%!", "Stop bothering me and give this to %player%!", "I'm not the recipient! This is meant for %player%!", "You've made a mistake—this belongs to %player%!", "Clearly, you didn't read the tag. This is for %player%!"));
-
-    public void onReceiverClicked(Player player, String name) {
-        if (Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam team) {
-            // Make sure the guy actually has a present
-            if (!currentDelivery.containsKey(player)) {
-                player.sendMessage(Component.text(name, NamedTextColor.WHITE, net.kyori.adventure.text.format.TextDecoration.BOLD).append(Component.text(": You don't even have a present! Get one from ", NamedTextColor.GRAY)).append(Component.text("Santa ", NamedTextColor.RED)).append(Component.text("first.", NamedTextColor.GRAY)));
-                return;
-            }
-
-            if (Objects.equals(currentDelivery.get(player), name)) {
-                player.getInventory().remove(Material.RED_WOOL);
-                presentsLeft -= 1;
-                currentDelivery.remove(player);
-
-                // Send an announcement that a present has been delivered
-                Bukkit.broadcast(Component.text(" "));
-                Bukkit.broadcast(Component.text(player.getName(), NamedTextColor.AQUA, net.kyori.adventure.text.format.TextDecoration.BOLD).append(Component.text(" delivered a ", NamedTextColor.GRAY)).append(Component.text("present", NamedTextColor.AQUA)).append(Component.text("!", NamedTextColor.GRAY)));
-                Bukkit.broadcast(Component.text(" "));
-
-                // Check if the win condition for the elves is met
-                if (presentsLeft <= 0) {
-                    handleWin(team);
-                }
-            } else {
-                var messageTemplate = messages.get(ThreadLocalRandom.current().nextInt(messages.size()));
-                Component message = buildMessage(messageTemplate, currentDelivery.get(player));
-                player.sendMessage(Component.text(name, NamedTextColor.WHITE, net.kyori.adventure.text.format.TextDecoration.BOLD).append(Component.text(": ", NamedTextColor.GRAY)).append(message));
-            }
-        }
-    }
-
-    public void onGiverClicked(Player player) {
-        if (Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(player) instanceof ElfTeam) {
-            if (currentDelivery.containsKey(player)) {
-                player.sendMessage(Component.text("Santa", NamedTextColor.RED, net.kyori.adventure.text.format.TextDecoration.BOLD).append(Component.text(": I already gave you a present!", NamedTextColor.GRAY)));
-                return;
-            }
-
-            // Get a random receiver to bring the present to
-            final var randomInt = ThreadLocalRandom.current().nextInt(receivers.size());
-            final var receiver = receivers.keySet().stream().toList().get(randomInt);
-
-            // Assign that receiver for the player
-            currentDelivery.put(player, receiver);
-            final var present = new ItemStackBuilder(Material.RED_WOOL).withName(Component.text("Present", NamedTextColor.RED)).buildStack();
-            player.getInventory().addItem(present);
-            player.sendMessage(Component.text("Santa", NamedTextColor.RED, net.kyori.adventure.text.format.TextDecoration.BOLD).append(Component.text(": Bring this present to ", NamedTextColor.GRAY)).append(Component.text(receiver, NamedTextColor.RED)).append(Component.text("!", NamedTextColor.GRAY)));
         }
     }
 
@@ -349,9 +281,6 @@ public class IngameState extends GameState {
         } else
             Bukkit.broadcast(Snowsplash.PREFIX.append(Component.text(player.getName(), NamedTextColor.AQUA, net.kyori.adventure.text.format.TextDecoration.BOLD).append(Component.text(" died!", NamedTextColor.GRAY))));
 
-        // Make sure the player isn't still delivering
-        currentDelivery.remove(player);
-
         Snowsplash.getInstance().getTaskManager().inject(new Runnable() {
             int tickCount = 0;
 
@@ -372,11 +301,7 @@ public class IngameState extends GameState {
     @Override
     public void onRespawn(PlayerRespawnEvent event) {
         final var team = Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
-        if (team instanceof HunterTeam) {
-            event.setRespawnLocation(Objects.requireNonNull(LocationAPI.getLocation("Hunters")));
-        } else {
-            event.setRespawnLocation(Objects.requireNonNull(LocationAPI.getLocation("Elves")));
-        }
+        event.setRespawnLocation(Objects.requireNonNull(LocationAPI.getLocation(team.getName())));
     }
 
     public void handleWin(Team team) {
@@ -392,11 +317,8 @@ public class IngameState extends GameState {
 
         // Make sure the team loses if there are no players left
         if (team.getPlayers().isEmpty()) {
-            if (team instanceof HunterTeam) {
-                handleWin(Snowsplash.getInstance().getGameManager().getTeamManager().getTeam("Elves"));
-            } else {
-                handleWin(Snowsplash.getInstance().getGameManager().getTeamManager().getTeam("Hunters"));
-            }
+            handleWin(Snowsplash.getInstance().getGameManager().getTeamManager().getTeams().stream()
+                    .filter(team1 -> !team1.equals(team)).findFirst().get());
         }
     }
 

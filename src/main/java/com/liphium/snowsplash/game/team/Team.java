@@ -10,13 +10,14 @@ import java.util.ArrayList;
 
 public class Team {
 
-    private final String name, cc;
+    private final String name;
+    private final NamedTextColor color;
     private final Material material;
     private final ArrayList<Player> players = new ArrayList<>();
 
-    public Team(String name, String cc, Material material) {
+    public Team(String name, NamedTextColor color, Material material) {
         this.name = name;
-        this.cc = cc;
+        this.color = color;
         this.material = material;
     }
 
@@ -24,8 +25,8 @@ public class Team {
         return name;
     }
 
-    public String getCc() {
-        return cc;
+    public NamedTextColor getColor() {
+        return color;
     }
 
     public Material getMaterial() {

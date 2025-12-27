@@ -34,7 +34,7 @@ public class LobbyState extends GameState {
 
     @Override
     public void start() {
-        Location location = LocationAPI.getLocation("Elves");
+        Location location = LocationAPI.getLocation("Red");
         if (location != null && location.getWorld() != null) {
             location.getWorld().setTime(0);
             location.getWorld().setThundering(false);

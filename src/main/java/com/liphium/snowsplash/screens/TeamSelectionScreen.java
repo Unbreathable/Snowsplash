@@ -6,7 +6,6 @@ import com.liphium.core.inventory.CScreen;
 import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.snowsplash.Snowsplash;
 import com.liphium.snowsplash.game.team.Team;
-import com.liphium.snowsplash.game.team.impl.HunterTeam;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
