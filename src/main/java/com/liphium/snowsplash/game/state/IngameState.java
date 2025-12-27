@@ -16,7 +16,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.type.Snow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -64,7 +63,7 @@ public class IngameState extends GameState {
         // Place all the snowmen
         for(Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
             final var location = LocationAPI.getLocation(team.getName() + "-Snowman");
-            final var man = new DestroyableSnowman(location, SNOWMAN_HEALTH);
+            final var man = new DestroyableSnowman(location, team, SNOWMAN_HEALTH);
 
             Snowsplash.getInstance().getMachineManager().addMachine(man);
             snowmen.put(team.getName(), man);
