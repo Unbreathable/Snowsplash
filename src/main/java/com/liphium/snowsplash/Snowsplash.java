@@ -8,7 +8,6 @@ import com.liphium.snowsplash.listener.ChatListener;
 import com.liphium.snowsplash.listener.GameListener;
 import com.liphium.snowsplash.listener.JoinQuitListener;
 import com.liphium.snowsplash.listener.machines.MachineManager;
-import com.liphium.snowsplash.screens.BrewingScreen;
 import com.liphium.snowsplash.screens.ItemShopScreen;
 import com.liphium.snowsplash.screens.TeamSelectionScreen;
 import com.liphium.snowsplash.util.TaskManager;
@@ -66,7 +65,7 @@ public final class Snowsplash extends JavaPlugin {
         getCommand("set").setExecutor(new SetCommand());
         getCommand("timer").setExecutor(new TimerCommand());
 
-        Core.getInstance().getScreens().register(new TeamSelectionScreen(), new BrewingScreen(), new ItemShopScreen());
+        Core.getInstance().getScreens().register(new TeamSelectionScreen(), new ItemShopScreen());
     }
 
     @Override

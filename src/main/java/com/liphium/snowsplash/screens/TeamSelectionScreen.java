@@ -20,10 +20,12 @@ public class TeamSelectionScreen extends CScreen {
 
     public void rebuild() {
         // 9 10 11 12 13 14 15 16 17
+        int index = 0;
         for (Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
-            int slot = team instanceof HunterTeam ? 10 : 16;
+            int slot = index == 0 ? 10 : 16;
 
             setItem(slot, new CItem(new ItemStackBuilder(team.getMaterial()).withLore(team.playerLore()).withName(Component.text(team.getName())).buildStack()).onClick(event -> click(team, event)));
+            index++;
         }
     }
 

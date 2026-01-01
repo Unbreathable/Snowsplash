@@ -19,7 +19,7 @@ public class ChatListener implements Listener {
         if (team == null) {
             Bukkit.broadcast(Component.text(event.getPlayer().getName(), NamedTextColor.GRAY, TextDecoration.ITALIC).append(Component.text(": ", NamedTextColor.DARK_GRAY)).append(event.message().color(NamedTextColor.GRAY)));
         } else {
-            Bukkit.broadcast(Component.text(team.getCc() + event.getPlayer().getName(), NamedTextColor.GRAY).append(Component.text(": ", NamedTextColor.DARK_GRAY)).append(event.message().color(NamedTextColor.GRAY)));
+            Bukkit.broadcast(Component.text(event.getPlayer().getName(), team.getColor()).append(Component.text(": ", NamedTextColor.DARK_GRAY)).append(event.message().color(NamedTextColor.GRAY)));
         }
     }
 
