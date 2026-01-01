@@ -22,7 +22,7 @@ public class DestroyableSnowman extends Machine {
 	private final Team own;
     private final Snowman man;
     private int shootCooldown = 0;
-    private static final int SHOOT_INTERVAL = 12;
+    private static final int SHOOT_INTERVAL = 24;
     private static final double TARGET_RANGE = 10.0;
 
     public DestroyableSnowman(Location location, Team own, double health) {
@@ -52,9 +52,9 @@ public class DestroyableSnowman extends Machine {
         
         // Make the snowman look at the target
         if (currentTarget != null && currentTarget.isOnline() && !currentTarget.isDead()) {
-            Location targetLoc = currentTarget.getEyeLocation();
+            Location targetLoc = currentTarget.getLocation();
 
-            Vector direction = targetLoc.toVector().subtract(location.toVector());
+            Vector direction = targetLoc.toVector().subtract(location.toVector()).normalize();
             Location lookAt = location.clone().setDirection(direction);
             
             man.teleport(lookAt);

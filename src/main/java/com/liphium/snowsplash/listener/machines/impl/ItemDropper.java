@@ -29,7 +29,7 @@ public class ItemDropper extends Machine {
         this.dropRate = ticks;
         count = ticks;
 
-        ArmorStand stand = location.getWorld().spawn(location.clone().add(0.5, -0.5, 0.5), ArmorStand.class);
+        ArmorStand stand = location.getWorld().spawn(location.clone().add(0, -1, 0), ArmorStand.class);
 
         stand.setCustomNameVisible(true);
         stand.customName(Component.text(name, color).appendSpace().append(Component.text("production happens here.", NamedTextColor.GRAY)));

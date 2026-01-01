@@ -43,6 +43,12 @@ public final class Snowsplash extends JavaPlugin {
         // Initialize multiverse core and stuff
         core = MultiverseCoreApi.get();
         assert core != null;
+        getLogger().info("Deleting game world...");
+        core.getWorldManager().getWorld(GAME_WORLD).peek(world -> {
+            core.getWorldManager().deleteWorld(DeleteWorldOptions.world(world)).onSuccess(() -> {
+                getLogger().info("Successfully deleted the game world.");
+            });
+        });
         getLogger().info("Creating world for the game...");
         core.getWorldManager().getLoadedWorld("world").peek(world -> {
             core.getWorldManager().cloneWorld(CloneWorldOptions.fromTo(world, GAME_WORLD)).onSuccess(() -> {

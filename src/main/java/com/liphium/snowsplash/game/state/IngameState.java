@@ -166,12 +166,6 @@ public class IngameState extends GameState {
             return;
         }
 
-        // Kill the player in case they fell down
-        if (event.getPlayer().getLocation().getY() <= 156) {
-            event.getPlayer().setHealth(0);
-            return;
-        }
-
         Team team = Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
 
         // Check if they wandered into a trap
