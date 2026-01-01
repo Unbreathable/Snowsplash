@@ -27,6 +27,7 @@ public class LobbyState extends GameState {
 
     // Constants
     private final int NEEDED_PlAYERS = 1;
+    private final String LOBBY_LOCATION = "Lobby";
 
     public LobbyState() {
         super("Waiting for players", 200);
@@ -34,7 +35,7 @@ public class LobbyState extends GameState {
 
     @Override
     public void start() {
-        Location location = LocationAPI.getLocation("Red");
+        Location location = LocationAPI.getLocation(LOBBY_LOCATION);
         if (location != null && location.getWorld() != null) {
             location.getWorld().setTime(0);
             location.getWorld().setThundering(false);
@@ -78,7 +79,7 @@ public class LobbyState extends GameState {
                         if (count <= 5) {
                             if (count == 0) {
                                 for (Player player : Bukkit.getOnlinePlayers()) {
-                                    player.showTitle(Title.title(Component.text("Elfhunt", NamedTextColor.AQUA, TextDecoration.BOLD), Component.text("Christmas Special", NamedTextColor.GRAY), Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(1))));
+                                    player.showTitle(Title.title(Component.text("Snowsplash", NamedTextColor.AQUA, TextDecoration.BOLD), Component.text("Winter Special", NamedTextColor.GRAY), Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(1))));
                                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
                                 }
 
@@ -88,7 +89,7 @@ public class LobbyState extends GameState {
                             }
 
                             for (Player player : Bukkit.getOnlinePlayers()) {
-                                player.showTitle(Title.title(Component.text(count, NamedTextColor.AQUA, TextDecoration.BOLD).append(Component.text("..", NamedTextColor.GRAY)), Component.text("Elfhunt", NamedTextColor.GRAY), Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(1))));
+                                player.showTitle(Title.title(Component.text(count, NamedTextColor.AQUA, TextDecoration.BOLD).append(Component.text("..", NamedTextColor.GRAY)), Component.text("Snowsplash", NamedTextColor.GRAY), Title.Times.times(Duration.ofSeconds(0), Duration.ofSeconds(3), Duration.ofSeconds(1))));
                                 player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
                             }
                         } else if (count % 10 == 0 && count <= 100) {
@@ -134,7 +135,7 @@ public class LobbyState extends GameState {
 
         player.getInventory().setItem(4, new ItemStackBuilder(Material.SADDLE).withName(Component.text("Teams ", NamedTextColor.AQUA, TextDecoration.BOLD).append(Component.text("(Right-click)", NamedTextColor.GRAY))).withLore(Component.text("Join a team.", NamedTextColor.GRAY, TextDecoration.ITALIC)).buildStack());
 
-        player.teleport(LocationAPI.getLocation("Elves"));
+        player.teleport(LocationAPI.getLocation(LOBBY_LOCATION));
 
         Snowsplash.getInstance().getTaskManager().inject(new Runnable() {
             int ticks = 0;
@@ -142,7 +143,7 @@ public class LobbyState extends GameState {
             @Override
             public void run() {
                 if (ticks++ >= 10) {
-                    player.teleport(LocationAPI.getLocation("Elves"));
+                    player.teleport(LocationAPI.getLocation(LOBBY_LOCATION));
                     Snowsplash.getInstance().getTaskManager().uninject(this);
                 }
             }

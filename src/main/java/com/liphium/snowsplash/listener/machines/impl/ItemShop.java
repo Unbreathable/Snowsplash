@@ -33,7 +33,7 @@ public class ItemShop extends Machine {
         stand.setBasePlate(false);
 
         // Get her some drip
-        stand.getEquipment().setHelmet(new ItemStack(Material.PIGLIN_HEAD));
+        stand.getEquipment().setHelmet(new ItemStack(Material.CARVED_PUMPKIN));
         ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
         ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS);
         ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);

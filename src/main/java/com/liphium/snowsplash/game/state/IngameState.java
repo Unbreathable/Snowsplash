@@ -4,9 +4,7 @@ import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.snowsplash.Snowsplash;
 import com.liphium.snowsplash.game.GameState;
 import com.liphium.snowsplash.game.team.Team;
-import com.liphium.snowsplash.game.team.impl.ColoredTeam;
 import com.liphium.snowsplash.listener.machines.impl.DestroyableSnowman;
-import com.liphium.snowsplash.listener.machines.impl.PresentReceiver;
 import com.liphium.snowsplash.util.LocationAPI;
 import com.liphium.snowsplash.util.Messages;
 import net.kyori.adventure.text.Component;
@@ -228,14 +226,7 @@ public class IngameState extends GameState {
             }
         }
 
-        // Place a machine if it is one
-        final var machine = Snowsplash.getInstance().getMachineManager().newMachineByMaterial(event.getBlockPlaced().getType(), event.getBlockPlaced().getLocation());
-        if (machine != null) {
-            Snowsplash.getInstance().getMachineManager().addMachine(machine);
-        } else {
-            // Add the block as placed otherwise
-            placedBlocks.put(event.getBlock().getLocation(), true);
-        }
+        placedBlocks.put(event.getBlock().getLocation(), true);
     }
 
     final List<Material> grassTypes = Arrays.asList(Material.TALL_GRASS, Material.SHORT_GRASS, Material.CORNFLOWER, Material.DANDELION, Material.POPPY, Material.BLUE_ORCHID, Material.ALLIUM, Material.AZURE_BLUET, Material.RED_TULIP, Material.ORANGE_TULIP, Material.WHITE_TULIP, Material.PINK_TULIP, Material.OXEYE_DAISY, Material.SUNFLOWER, Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.LILY_OF_THE_VALLEY, Material.WITHER_ROSE, Material.COBWEB, Material.FERN, Material.SWEET_BERRY_BUSH);

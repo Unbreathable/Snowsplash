@@ -59,7 +59,90 @@ public class ItemShopScreen extends CScreen {
     }
 
     public enum ShopCategory {
-        WEAPONS(new ItemStackBuilder(Material.IRON_SWORD).withName(Component.text("Weapons", NamedTextColor.RED, TextDecoration.BOLD)).withLore(Component.text("Swords, bows, and more.", NamedTextColor.GRAY)).buildStack(), List.of(itemWithPrice(Material.MACE, "Mace", NamedTextColor.RED, 25, 1), itemWithPrice(Material.WIND_CHARGE, "Wind charge", NamedTextColor.RED, 20, 5), itemWithPrice(Material.BOW, "Bow", NamedTextColor.RED, 10, 1), itemWithPriceCustom(new ItemStackBuilder(Material.BOW).withName(Component.text("Punch Bow", NamedTextColor.RED)).withEnchantments(Map.of(Enchantment.PUNCH, 1)).buildStack(), 20), itemWithPriceCustom(new ItemStackBuilder(Material.BOW).withName(Component.text("More Punch Bow", NamedTextColor.RED)).withEnchantments(Map.of(Enchantment.PUNCH, 2, Enchantment.INFINITY, 1)).buildStack(), 100), itemWithPrice(Material.ARROW, "Arrow", NamedTextColor.RED, 15, 3), itemWithPrice(Material.CROSSBOW, "Crossbow", NamedTextColor.RED, 50, 1), itemWithPriceCustom(new ItemStackBuilder(Material.FIREWORK_ROCKET).withName(Component.text("Rocket", NamedTextColor.RED)).withAmount(3).buildStack(), 30))), DEFENSE(new ItemStackBuilder(Material.SHIELD).withName(Component.text("Defense", NamedTextColor.AQUA, TextDecoration.BOLD)).withLore(Component.text("Turrets and traps.", NamedTextColor.GRAY)).buildStack(), List.of(itemWithPrice(Material.GRAY_DYE, "Slow trap", NamedTextColor.AQUA, 25, 1), itemWithPrice(Material.LIME_DYE, "Poison trap", NamedTextColor.AQUA, 25, 1), itemWithPrice(Material.WHITE_DYE, "Web trap", NamedTextColor.AQUA, 35, 1), itemWithPrice(Material.LIGHT_BLUE_DYE, "Freeze trap", NamedTextColor.AQUA, 35, 1))), TOOLS(new ItemStackBuilder(Material.DIAMOND_PICKAXE).withName(Component.text("Tools", NamedTextColor.AQUA, TextDecoration.BOLD)).withLore(Component.text("Shovels and pickaxes.", NamedTextColor.GRAY)).buildStack(), List.of(itemWithPriceCustom(new ItemStackBuilder(Material.GOLDEN_SHOVEL).withName(Component.text("Golden shovel", NamedTextColor.AQUA)).withEnchantments(Map.of(Enchantment.EFFICIENCY, 5)).buildStack(), 15), itemWithPriceCustom(new ItemStackBuilder(Material.DIAMOND_SHOVEL).withName(Component.text("Diamond shovel", NamedTextColor.AQUA)).withEnchantments(Map.of(Enchantment.EFFICIENCY, 5)).buildStack(), 35), spacer(), itemWithPriceCustom(new ItemStackBuilder(Material.GOLDEN_PICKAXE).withName(Component.text("Golden pickaxe", NamedTextColor.AQUA)).withEnchantments(Map.of(Enchantment.EFFICIENCY, 5)).buildStack(), 15), itemWithPriceCustom(new ItemStackBuilder(Material.DIAMOND_PICKAXE).withName(Component.text("Diamond pickaxe", NamedTextColor.AQUA)).withEnchantments(Map.of(Enchantment.EFFICIENCY, 5)).buildStack(), 35))), ITEMS(new ItemStackBuilder(Material.IRON_PICKAXE).withName(Component.text("Items", NamedTextColor.WHITE, TextDecoration.BOLD)).withLore(Component.text("Blocks & materials.", NamedTextColor.GRAY)).buildStack(), List.of(itemWithPrice(Material.PACKED_ICE, "Ice", NamedTextColor.WHITE, 2, 16), itemWithPrice(Material.SNOW_BLOCK, "Snow", NamedTextColor.WHITE, 4, 16), itemWithPrice(Material.SPRUCE_LOG, "Spruce wood", NamedTextColor.WHITE, 8, 4), itemWithPrice(Material.COBBLESTONE, "Cobblestone", NamedTextColor.WHITE, 8, 16), itemWithPrice(Material.COBWEB, "Cobweb", NamedTextColor.WHITE, 10, 1), spacer(), itemWithPrice(Material.IRON_INGOT, "Iron", NamedTextColor.WHITE, 4, 1), itemWithPrice(Material.DIAMOND, "Diamond", NamedTextColor.WHITE, 7, 1), itemWithPrice(Material.GOLDEN_APPLE, "Golden apple", NamedTextColor.WHITE, 10, 1))), DROPPER(new ItemStackBuilder(Material.DROPPER).withName(Component.text("Droppers", NamedTextColor.GOLD, TextDecoration.BOLD)).withLore(Component.text("Coin and material droppers.", NamedTextColor.GRAY)).buildStack(), List.of(itemWithPrice(Material.GOLD_ORE, "Coin dropper", NamedTextColor.GOLD, 35, 1), itemWithPrice(Material.WHITE_CONCRETE, "Iron dropper", NamedTextColor.GOLD, 20, 1), itemWithPrice(Material.RED_CONCRETE, "Redstone dropper", NamedTextColor.GOLD, 20, 1), itemWithPrice(Material.CYAN_CONCRETE, "Diamond dropper", NamedTextColor.GOLD, 30, 1), itemWithPrice(Material.DISPENSER, "Dropper dropper", NamedTextColor.GOLD, 60, 1), itemWithPrice(Material.TARGET, "Arrow dropper", NamedTextColor.GOLD, 20, 1), itemWithPrice(Material.REDSTONE_LAMP, "Rocket dropper", NamedTextColor.GOLD, 20, 1), itemWithPrice(Material.BEACON, "Golden apple dropper", NamedTextColor.GOLD, 40, 1), itemWithPrice(Material.BREWING_STAND, "Brewer", NamedTextColor.GOLD, 40, 1)));
+        BOWS(
+                new ItemStackBuilder(Material.BOW)
+                        .withName(Component.text("Bows", NamedTextColor.RED, TextDecoration.BOLD))
+                        .withLore(Component.text("Bows & utilities.", NamedTextColor.GRAY))
+                        .buildStack(),
+                List.of(
+                        itemWithPrice(Material.WIND_CHARGE, "Wind charge", NamedTextColor.RED, 20, 5),
+                        itemWithPrice(Material.BOW, "Bow", NamedTextColor.RED, 10, 1),
+                        itemWithPriceCustom(
+                                new ItemStackBuilder(Material.BOW)
+                                        .withName(Component.text("Punch", NamedTextColor.RED))
+                                        .withEnchantments(Map.of(Enchantment.PUNCH, 1))
+                                        .buildStack(),
+                                15
+                        ),
+                        itemWithPriceCustom(
+                                new ItemStackBuilder(Material.BOW)
+                                        .withName(Component.text("Power", NamedTextColor.RED))
+                                        .withEnchantments(Map.of(Enchantment.POWER, 1))
+                                        .buildStack(),
+                                30
+                        ),
+                        itemWithPriceCustom(
+                                new ItemStackBuilder(Material.BOW)
+                                        .withName(Component.text("Absolute power", NamedTextColor.RED))
+                                        .withEnchantments(Map.of(Enchantment.POWER, 2))
+                                        .buildStack(),
+                                70
+                        ),
+                        itemWithPriceCustom(
+                                new ItemStackBuilder(Material.BOW)
+                                        .withName(Component.text("Power & Punch", NamedTextColor.RED))
+                                        .withEnchantments(Map.of(Enchantment.PUNCH, 1, Enchantment.POWER, 1))
+                                        .buildStack(),
+                                40
+                        ),
+                        itemWithPrice(Material.CROSSBOW, "Crossbow", NamedTextColor.RED, 40, 1)
+                )
+        ),
+        ARROWS(
+                new ItemStackBuilder(Material.ARROW)
+                        .withName(Component.text("Arrows", NamedTextColor.GOLD, TextDecoration.BOLD))
+                        .withLore(Component.text("Effects for your arrows.", NamedTextColor.GRAY))
+                        .buildStack(),
+                List.of(
+                        itemWithPrice(Material.FEATHER, "Flying", NamedTextColor.GOLD, 8, 1),
+                        itemWithPrice(Material.GRAY_DYE, "Slowness", NamedTextColor.GOLD, 8, 1),
+                        itemWithPrice(Material.RED_DYE, "Damage", NamedTextColor.GOLD, 8, 1),
+                        itemWithPrice(Material.GREEN_DYE, "Regeneration", NamedTextColor.GOLD, 8, 1),
+                        itemWithPrice(Material.GUNPOWDER, "Explosion", NamedTextColor.GOLD, 8, 1),
+                        itemWithPrice(Material.WHITE_DYE, "Web", NamedTextColor.GOLD, 8, 1)
+                )
+        ),
+        TOOLS(
+                new ItemStackBuilder(Material.IRON_PICKAXE)
+                        .withName(Component.text("Tools", NamedTextColor.AQUA, TextDecoration.BOLD))
+                        .withLore(Component.text("Useful tools.", NamedTextColor.GRAY))
+                        .buildStack(),
+                List.of(
+                        itemWithPrice(Material.IRON_PICKAXE, "Iron pickaxe", NamedTextColor.AQUA, 8, 1),
+                        itemWithPrice(Material.IRON_AXE, "Iron axe", NamedTextColor.AQUA, 8, 1),
+                        itemWithPrice(Material.IRON_SHOVEL, "Iron shovel", NamedTextColor.AQUA, 8, 1),
+                        spacer(),
+                        itemWithPrice(Material.DIAMOND_PICKAXE, "Diamond pickaxe", NamedTextColor.AQUA, 16, 1),
+                        itemWithPrice(Material.DIAMOND_AXE, "Diamond axe", NamedTextColor.AQUA, 16, 1),
+                        itemWithPrice(Material.DIAMOND_SHOVEL, "Diamond shovel", NamedTextColor.AQUA, 16, 1)
+                )
+        ),
+        EXTRA(
+                new ItemStackBuilder(Material.TNT)
+                        .withName(Component.text("Extra", NamedTextColor.WHITE, TextDecoration.BOLD))
+                        .withLore(Component.text("Blocks, special items, etc.", NamedTextColor.GRAY))
+                        .buildStack(),
+                List.of(
+                        itemWithPrice(Material.PACKED_ICE, "Ice", NamedTextColor.WHITE, 2, 16),
+                        itemWithPrice(Material.SNOW_BLOCK, "Snow", NamedTextColor.WHITE, 4, 16),
+                        itemWithPrice(Material.SPRUCE_LOG, "Spruce wood", NamedTextColor.WHITE, 8, 4),
+                        itemWithPrice(Material.COBBLESTONE, "Cobblestone", NamedTextColor.WHITE, 8, 16),
+                        spacer(),
+                        itemWithPrice(Material.SPRUCE_BOAT, "Boat", NamedTextColor.WHITE, 4, 1),
+                        itemWithPrice(Material.TNT, "TNT", NamedTextColor.WHITE, 8, 1),
+                        itemWithPrice(Material.GOLDEN_APPLE, "Golden apple", NamedTextColor.WHITE, 10, 1)
+                )
+        );
 
         final ItemStack stack;
         final List<CItem> items;

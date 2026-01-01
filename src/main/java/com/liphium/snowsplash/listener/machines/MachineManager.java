@@ -20,9 +20,7 @@ public class MachineManager {
         ArrayList<String> registered = new ArrayList<>();
 
         // Add all machines (all the ones that can be spawned by location)
-        registered.add("CoinDropper");
-        registered.add("PresentReceiver");
-        registered.add("PresentGiver");
+        registered.add("IceDropper");
         registered.add("ItemShop");
 
         for (String s : registered) {
@@ -74,31 +72,8 @@ public class MachineManager {
 
     public Machine newMachineByLocation(String name, Location location) {
         return switch (name) {
-            case "CoinDropper" -> new CoinDropper(location, false);
-            case "PresentReceiver" -> new PresentReceiver(location);
-            case "PresentGiver" -> new PresentGiver(location);
+            case "IceDropper" -> new ItemDropper(location, "Ice", NamedTextColor.AQUA, new ItemStack(Material.BLUE_ICE), 20);
             case "ItemShop" -> new ItemShop(location);
-            default -> null;
-        };
-    }
-
-    public Machine newMachineByMaterial(Material material, Location location) {
-        return switch (material) {
-            case Material.GOLD_ORE -> new CoinDropper(location, true);
-            case Material.WHITE_CONCRETE ->
-                    new ItemDropper(location, "Iron", NamedTextColor.WHITE, new ItemStack(Material.IRON_INGOT), 20);
-            case Material.CYAN_CONCRETE ->
-                    new ItemDropper(location, "Diamond", NamedTextColor.AQUA, new ItemStack(Material.DIAMOND), 30);
-            case Material.RED_CONCRETE ->
-                    new ItemDropper(location, "Redstone", NamedTextColor.RED, new ItemStack(Material.REDSTONE), 10);
-            case Material.DISPENSER ->
-                    new ItemDropper(location, "Dropper", NamedTextColor.YELLOW, new ItemStack(Material.DROPPER), 30);
-            case Material.TARGET ->
-                    new ItemDropper(location, "Arrow", NamedTextColor.RED, new ItemStack(Material.ARROW), 30);
-            case Material.BEACON ->
-                    new ItemDropper(location, "Golden apple", NamedTextColor.GOLD, new ItemStack(Material.GOLDEN_APPLE), 30);
-            case Material.REDSTONE_LAMP -> new RocketDropper(location);
-            case Material.BREWING_STAND -> new Brewer(location);
             default -> null;
         };
     }

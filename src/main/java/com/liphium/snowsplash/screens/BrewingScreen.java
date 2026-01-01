@@ -3,7 +3,6 @@ package com.liphium.snowsplash.screens;
 import com.liphium.core.inventory.CItem;
 import com.liphium.core.inventory.CScreen;
 import com.liphium.core.util.ItemStackBuilder;
-import com.liphium.snowsplash.listener.machines.impl.Brewer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
