@@ -2,6 +2,7 @@ package com.liphium.snowsplash.listener;
 
 import com.liphium.snowsplash.Snowsplash;
 import com.liphium.snowsplash.game.state.LobbyState;
+import org.bukkit.block.data.type.Snow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -88,5 +89,15 @@ public class GameListener implements Listener {
         }
 
         event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onProjectileHit(ProjectileHitEvent event) {
+        Snowsplash.getInstance().getGameManager().getCurrentState().onProjectileHit(event);
+    }
+
+    @EventHandler
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        Snowsplash.getInstance().getGameManager().getCurrentState().onProjectileLaunch(event);
     }
 }

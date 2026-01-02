@@ -9,21 +9,16 @@ import com.liphium.snowsplash.util.LocationAPI;
 import com.liphium.snowsplash.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -41,7 +36,14 @@ public class IngameState extends GameState {
 
     private Runnable runnable;
 
-    private static final double SNOWMAN_HEALTH = 300;
+    private static final double SNOWMAN_HEALTH = 20;
+    private static final int ICE_ON_DEATH = 2; // The amount of ice a player gets when they kill someone
+
+    private static final int SNOWBALL_TICKS = 1;
+    private static final int SNOWBALL_COOLDOWN = 6; // Cooldown that is set when players use a snowball
+    private static final double SNOWBALL_DAMAGE = 2.5;
+
+    private static final int ARROW_COOLDOWN = 70;
 
     public IngameState() {
         super("In game", 30);
@@ -82,6 +84,7 @@ public class IngameState extends GameState {
         // Start the game loop
         Snowsplash.getInstance().getTaskManager().inject(runnable = new Runnable() {
             int tickCount = 0;
+            int snowballCount = 0;
 
             @Override
             public void run() {
@@ -102,7 +105,29 @@ public class IngameState extends GameState {
                         index++;
                     }
 
+                    // Let a team win the game when the snowman is down
+                    for(Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
+                        final var man = snowmen.get(team.getName());
+
+                        if(man.man.isDead()) {
+                            final var other = Snowsplash.getInstance().getGameManager().getTeamManager().getTeams().stream()
+                                    .filter(t -> !t.getName().equals(team.getName())).findFirst().get();
+                            handleWin(other);
+                        }
+                    }
+
                     Messages.actionBar(base);
+                }
+
+                // Give players snowballs every few ticks
+                if(snowballCount++ >= SNOWBALL_TICKS) {
+                    snowballCount = 0;
+
+                    for(Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
+                        for(Player player : team.getPlayers()) {
+                            player.getInventory().setItem(0, new ItemStackBuilder(Material.SNOWBALL).withAmount(16).buildStack());
+                        }
+                    }
                 }
             }
         });
@@ -110,14 +135,16 @@ public class IngameState extends GameState {
 
     @Override
     public void onInteract(PlayerInteractEvent event) {
-        if (event.getItem() != null && event.getItem().getType() == Material.WIND_CHARGE) {
+        if (event.getItem() != null && (event.getItem().getType() == Material.WIND_CHARGE || event.getItem().getType() == Material.SNOWBALL)) {
             return;
         }
+
         Snowsplash.getInstance().getMachineManager().onInteract(event);
 
         if (event.getItem() != null) {
             Team team = Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
             ItemStack usedItem = event.getItem();
+
             if (usedItem.getType().equals(Material.GRAY_DYE) && event.getClickedBlock() != null) {
                 traps.add(new SlowTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
                 reduceMainHandItem(event.getPlayer(), Material.GRAY_DYE);
@@ -196,6 +223,19 @@ public class IngameState extends GameState {
     }
 
     @Override
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        if(event.getEntity().getShooter() == null || !(event.getEntity().getShooter() instanceof Player player)) return;
+
+        // Handle the snowball and arrow cooldowns
+        if(event.getEntity().getType() == EntityType.SNOWBALL) {
+            player.setCooldown(Material.SNOWBALL, SNOWBALL_COOLDOWN);
+        } else if(event.getEntity().getType() == EntityType.ARROW) {
+            player.setCooldown(Material.CROSSBOW, ARROW_COOLDOWN);
+            player.setCooldown(Material.BOW, ARROW_COOLDOWN);
+        }
+    }
+
+    @Override
     public void onEntityExplode(EntityExplodeEvent event) {
         event.blockList().clear();
     }
@@ -218,6 +258,14 @@ public class IngameState extends GameState {
                 event.setCancelled(true);
                 return;
             }
+        }
+
+        // Instantly light TNT
+        if(event.getBlock().getType() == Material.TNT) {
+            event.getBlock().setType(Material.AIR);
+            final var world = event.getBlock().getWorld();
+            world.spawnEntity(event.getBlock().getLocation(), EntityType.TNT);
+            return;
         }
 
         placedBlocks.put(event.getBlock().getLocation(), true);
@@ -252,18 +300,21 @@ public class IngameState extends GameState {
     public void onDeath(PlayerDeathEvent event) {
         final var player = event.getPlayer();
 
-        player.getInventory().clear();
-        player.getInventory().setBoots(null);
-        player.getInventory().setLeggings(null);
-        player.getInventory().setChestplate(null);
-        player.getInventory().setHelmet(null);
         event.deathMessage(null);
+        event.setKeepInventory(true);
         event.setKeepLevel(true);
 
         if (player.getKiller() != null) {
-            Bukkit.broadcast(Snowsplash.PREFIX.append(Component.text(player.getName(), NamedTextColor.AQUA).append(Component.text(" was killed by ", NamedTextColor.GRAY)).append(Component.text(player.getKiller().getName(), NamedTextColor.AQUA, net.kyori.adventure.text.format.TextDecoration.BOLD)).append(Component.text("!", NamedTextColor.GRAY))));
-        } else
-            Bukkit.broadcast(Snowsplash.PREFIX.append(Component.text(player.getName(), NamedTextColor.AQUA, net.kyori.adventure.text.format.TextDecoration.BOLD).append(Component.text(" died!", NamedTextColor.GRAY))));
+            Bukkit.broadcast(Snowsplash.PREFIX.append(Component.text(player.getName(), NamedTextColor.AQUA)
+                    .append(Component.text(" was killed by ", NamedTextColor.GRAY))
+                    .append(Component.text(player.getKiller().getName(), NamedTextColor.AQUA, TextDecoration.BOLD))
+                    .append(Component.text("!", NamedTextColor.GRAY))));
+            player.getKiller().getInventory().addItem(new ItemStackBuilder(Material.BLUE_ICE).withAmount(ICE_ON_DEATH).buildStack());
+        } else {
+            Bukkit.broadcast(Snowsplash.PREFIX
+                    .append(Component.text(player.getName(), NamedTextColor.AQUA, TextDecoration.BOLD))
+                    .append(Component.text(" died!", NamedTextColor.GRAY)));
+        }
 
         Snowsplash.getInstance().getTaskManager().inject(new Runnable() {
             int tickCount = 0;
@@ -273,13 +324,28 @@ public class IngameState extends GameState {
                 if (tickCount++ >= 1) {
                     if (player.isDead()) {
                         player.spigot().respawn();
-                        player.getInventory().clear();
                         player.setHealth(20);
                     }
                     Snowsplash.getInstance().getTaskManager().uninject(this);
                 }
             }
         });
+    }
+
+    @Override
+    public void onProjectileHit(ProjectileHitEvent event) {
+        if(!(event.getEntity().getType() == EntityType.SNOWBALL)) return;
+
+        if(event.getHitEntity() instanceof LivingEntity target) {
+            target.damage(SNOWBALL_DAMAGE);
+
+            // Apply knockback similar to vanilla
+            if(target instanceof Player) {
+                Vector knockback = event.getEntity().getVelocity().normalize().multiply(0.5);
+                knockback.setY(0.4);
+                target.setVelocity(target.getVelocity().add(knockback));
+            }
+        }
     }
 
     @Override

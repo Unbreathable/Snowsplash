@@ -72,7 +72,7 @@ public class MachineManager {
 
     public Machine newMachineByLocation(String name, Location location) {
         return switch (name) {
-            case "IceDropper" -> new ItemDropper(location, "Ice", NamedTextColor.AQUA, new ItemStack(Material.BLUE_ICE), 20);
+            case "IceDropper" -> new ItemDropper(location, "Ice", NamedTextColor.AQUA, new ItemStack(Material.BLUE_ICE), 12);
             case "ItemShop" -> new ItemShop(location);
             default -> null;
         };

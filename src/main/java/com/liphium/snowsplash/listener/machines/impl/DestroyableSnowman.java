@@ -20,10 +20,10 @@ import java.util.Objects;
 public class DestroyableSnowman extends Machine {
 
 	private final Team own;
-    private final Snowman man;
+    public final Snowman man;
     private int shootCooldown = 0;
     private static final int SHOOT_INTERVAL = 24;
-    private static final double TARGET_RANGE = 10.0;
+    private static final double TARGET_RANGE = 20.0;
 
     public DestroyableSnowman(Location location, Team own, double health) {
         super(location, false);

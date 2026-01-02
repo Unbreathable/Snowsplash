@@ -62,6 +62,12 @@ public abstract class GameState {
     public void onRespawn(PlayerRespawnEvent event) {
     }
 
+    public void onProjectileHit(ProjectileHitEvent event) {
+    }
+
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+    }
+
     public void join(Player player) {
     }
 

@@ -65,7 +65,6 @@ public class ItemShopScreen extends CScreen {
                         .withLore(Component.text("Bows & utilities.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.WIND_CHARGE, "Wind charge", NamedTextColor.RED, 20, 5),
                         itemWithPrice(Material.BOW, "Bow", NamedTextColor.RED, 10, 1),
                         itemWithPriceCustom(
                                 new ItemStackBuilder(Material.BOW)
@@ -95,7 +94,10 @@ public class ItemShopScreen extends CScreen {
                                         .buildStack(),
                                 40
                         ),
-                        itemWithPrice(Material.CROSSBOW, "Crossbow", NamedTextColor.RED, 40, 1)
+                        itemWithPrice(Material.CROSSBOW, "Crossbow", NamedTextColor.RED, 40, 1),
+                        spacer(),
+                        itemWithPrice(Material.WIND_CHARGE, "Wind charge", NamedTextColor.RED, 2, 5),
+                        itemWithPrice(Material.ARROW, "Arrow", NamedTextColor.RED, 1, 4)
                 )
         ),
         ARROWS(
@@ -118,13 +120,13 @@ public class ItemShopScreen extends CScreen {
                         .withLore(Component.text("Useful tools.", NamedTextColor.GRAY))
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.IRON_PICKAXE, "Iron pickaxe", NamedTextColor.AQUA, 8, 1),
-                        itemWithPrice(Material.IRON_AXE, "Iron axe", NamedTextColor.AQUA, 8, 1),
-                        itemWithPrice(Material.IRON_SHOVEL, "Iron shovel", NamedTextColor.AQUA, 8, 1),
+                        itemWithPrice(Material.IRON_PICKAXE, "Iron pickaxe", NamedTextColor.AQUA, 4, 1),
+                        itemWithPrice(Material.IRON_AXE, "Iron axe", NamedTextColor.AQUA, 4, 1),
+                        itemWithPrice(Material.IRON_SHOVEL, "Iron shovel", NamedTextColor.AQUA, 4, 1),
                         spacer(),
-                        itemWithPrice(Material.DIAMOND_PICKAXE, "Diamond pickaxe", NamedTextColor.AQUA, 16, 1),
-                        itemWithPrice(Material.DIAMOND_AXE, "Diamond axe", NamedTextColor.AQUA, 16, 1),
-                        itemWithPrice(Material.DIAMOND_SHOVEL, "Diamond shovel", NamedTextColor.AQUA, 16, 1)
+                        itemWithPrice(Material.DIAMOND_PICKAXE, "Diamond pickaxe", NamedTextColor.AQUA, 8, 1),
+                        itemWithPrice(Material.DIAMOND_AXE, "Diamond axe", NamedTextColor.AQUA, 8, 1),
+                        itemWithPrice(Material.DIAMOND_SHOVEL, "Diamond shovel", NamedTextColor.AQUA, 8, 1)
                 )
         ),
         EXTRA(
@@ -178,19 +180,19 @@ public class ItemShopScreen extends CScreen {
             // Get the amount of pumpkins in the inventory
             int count = 0;
             for (ItemStack item : event.player().getInventory()) {
-                if (item != null && item.getType() == Material.GOLD_NUGGET) {
+                if (item != null && item.getType() == Material.BLUE_ICE) {
                     count += item.getAmount();
                 }
             }
 
             if (count < price) {
-                event.player().sendMessage(Snowsplash.PREFIX.append(Component.text("You don't have enough coins to purchase this item.", NamedTextColor.RED)));
+                event.player().sendMessage(Snowsplash.PREFIX.append(Component.text("You don't have enough Blue Ice to purchase this item.", NamedTextColor.RED)));
                 event.player().closeInventory();
                 return;
             }
 
             // Remove the pumpkins from the players inventory
-            removeAmountFromInventory(event.player(), Material.GOLD_NUGGET, price);
+            removeAmountFromInventory(event.player(), Material.BLUE_ICE, price);
 
             event.player().getInventory().addItem(stack);
         }

@@ -43,6 +43,7 @@ public class LobbyState extends GameState {
             location.getWorld().setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, false);
             location.getWorld().setGameRule(GameRules.ADVANCE_TIME, false);
             location.getWorld().setGameRule(GameRules.ADVANCE_WEATHER, false);
+            location.getWorld().setGameRule(GameRules.KEEP_INVENTORY, true);
             location.getWorld().setDifficulty(Difficulty.PEACEFUL);
 
             // World cleanup

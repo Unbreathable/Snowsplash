@@ -7,9 +7,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -25,6 +28,29 @@ public class ColoredTeam extends Team {
         if (teleport) {
             player.teleport(Objects.requireNonNull(LocationAPI.getLocation(this.getName())));
         }
+
+        // Get color from NamedTextColor RGB values
+        Color armorColor = Color.fromRGB(this.getColor().value());
+
+        // Create colored leather boots
+        ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
+        LeatherArmorMeta bootsMeta = (LeatherArmorMeta) boots.getItemMeta();
+        if (bootsMeta != null) {
+            bootsMeta.setColor(armorColor);
+            boots.setItemMeta(bootsMeta);
+        }
+
+        // Create colored leather leggings
+        ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS);
+        LeatherArmorMeta leggingsMeta = (LeatherArmorMeta) leggings.getItemMeta();
+        if (leggingsMeta != null) {
+            leggingsMeta.setColor(armorColor);
+            leggings.setItemMeta(leggingsMeta);
+        }
+
+        // Equip the armor
+        player.getInventory().setBoots(boots);
+        player.getInventory().setLeggings(leggings);
     }
 
     @Override
