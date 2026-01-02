@@ -20,6 +20,8 @@ import java.util.Objects;
 
 public class EndState extends GameState {
 
+    private final String LOBBY_LOCATION = "Lobby";
+
     public EndState() {
         super("Ending", 20);
     }
@@ -29,7 +31,7 @@ public class EndState extends GameState {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.setGameMode(GameMode.SURVIVAL);
-            player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Elves")));
+            player.teleport(Objects.requireNonNull(LocationAPI.getLocation(LOBBY_LOCATION)));
 
             player.getInventory().clear();
             player.getInventory().setHelmet(null);

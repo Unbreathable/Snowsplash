@@ -10,10 +10,7 @@ import com.liphium.snowsplash.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -24,6 +21,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -36,7 +34,7 @@ public class IngameState extends GameState {
 
     private Runnable runnable;
 
-    private static final double SNOWMAN_HEALTH = 20;
+    private static final double SNOWMAN_HEALTH = 300;
     private static final int ICE_ON_DEATH = 2; // The amount of ice a player gets when they kill someone
 
     private static final int SNOWBALL_TICKS = 1;
@@ -51,9 +49,25 @@ public class IngameState extends GameState {
 
     private final HashMap<String, DestroyableSnowman> snowmen = new HashMap<>();
     private final HashMap<Location, Boolean> placedBlocks = new HashMap<>();
+    private final HashMap<Player, String> currentArrowEffect = new HashMap<>();
+    private HashMap<Location, Integer> toDeleteAfter = new HashMap<>();
 
     @Override
     public void start() {
+
+        final var world = Bukkit.getWorld(Snowsplash.GAME_WORLD);
+        assert(world != null);
+        world.setGameRule(GameRules.ADVANCE_TIME, true);
+        world.setGameRule(GameRules.ADVANCE_WEATHER, true);
+        world.setTime(0);
+        world.setThundering(false);
+        world.setStorm(false);
+        world.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, false);
+        world.setGameRule(GameRules.ADVANCE_TIME, false);
+        world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+        world.setGameRule(GameRules.KEEP_INVENTORY, true);
+        world.setDifficulty(Difficulty.EASY);
+
 
         // World cleanup
         for (Entity entity : Objects.requireNonNull(Bukkit.getWorld(Snowsplash.GAME_WORLD)).getEntities()) {
@@ -129,6 +143,18 @@ public class IngameState extends GameState {
                         }
                     }
                 }
+
+                // Delete all blocks that should be deleted
+                final var newMap = new HashMap<Location, Integer>();
+                for(var entry : toDeleteAfter.entrySet()) {
+                    final var newValue = entry.getValue() - 1;
+                    if(newValue <= 0) {
+                        entry.getKey().getBlock().setType(Material.AIR);
+                    } else {
+                        newMap.put(entry.getKey(), newValue);
+                    }
+                }
+                toDeleteAfter = newMap;
             }
         });
     }
@@ -145,21 +171,61 @@ public class IngameState extends GameState {
             Team team = Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(event.getPlayer());
             ItemStack usedItem = event.getItem();
 
-            if (usedItem.getType().equals(Material.GRAY_DYE) && event.getClickedBlock() != null) {
-                traps.add(new SlowTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer(), Material.GRAY_DYE);
-            } else if (usedItem.getType().equals(Material.LIME_DYE) && event.getClickedBlock() != null) {
-                traps.add(new PoisonTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer(), Material.LIME_DYE);
-            } else if (usedItem.getType().equals(Material.FEATHER) && event.getClickedBlock() != null) {
-                traps.add(new FlyTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer(), Material.FEATHER);
-            } else if (usedItem.getType().equals(Material.LIGHT_BLUE_DYE) && event.getClickedBlock() != null) {
-                traps.add(new FreezeTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer(), Material.LIGHT_BLUE_DYE);
-            } else if (usedItem.getType().equals(Material.WHITE_DYE) && event.getClickedBlock() != null) {
-                traps.add(new WebTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team));
-                reduceMainHandItem(event.getPlayer(), Material.WHITE_DYE);
+            var hit = false;
+            DroppableTrap trapToPlace = null;
+            switch(usedItem.getType()) {
+                case Material.GRAY_DYE -> {
+                    hit = true;
+                    reduceMainHandItem(event.getPlayer(), Material.GRAY_DYE);
+                    if(event.getClickedBlock() == null) {
+                        currentArrowEffect.put(event.getPlayer(), "slowness");
+                    } else {
+                        trapToPlace = new SlowTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team);
+                    }
+                }
+                case Material.LIME_DYE -> {
+                    hit = true;
+                    reduceMainHandItem(event.getPlayer(), Material.LIME_DYE);
+                    if(event.getClickedBlock() == null) {
+                        currentArrowEffect.put(event.getPlayer(), "poison");
+                    } else {
+                        trapToPlace = new PoisonTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team);
+                    }
+                }
+                case Material.GUNPOWDER -> {
+                    hit = true;
+                    reduceMainHandItem(event.getPlayer(), Material.GUNPOWDER);
+                    if(event.getClickedBlock() == null) {
+                        currentArrowEffect.put(event.getPlayer(), "explosion");
+                    } else {
+                        trapToPlace = new ExplosionTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team);
+                    }
+                }
+                case Material.WHITE_DYE -> {
+                    hit = true;
+                    reduceMainHandItem(event.getPlayer(), Material.WHITE_DYE);
+                    if(event.getClickedBlock() == null) {
+                        currentArrowEffect.put(event.getPlayer(), "web");
+                    } else {
+                        trapToPlace = new WebTrap(event.getClickedBlock().getLocation().clone().add(0.5, 1, 0.5), team);
+                    }
+                }
+            }
+
+            if(trapToPlace != null) {
+                traps.add(trapToPlace);
+                trapToPlace.drop();
+            }
+
+            // Send a message
+            if(hit) {
+                if(trapToPlace != null) {
+                    event.getPlayer().sendMessage(Snowsplash.PREFIX
+                            .append(Component.text("Trap placed!", NamedTextColor.GRAY)));
+                } else {
+                    event.getPlayer().sendMessage(Snowsplash.PREFIX
+                            .append(Component.text("Arrow effect attached to next arrow!", NamedTextColor.GRAY)));
+                }
             }
         }
     }
@@ -188,6 +254,12 @@ public class IngameState extends GameState {
     }
 
     @Override
+    public void join(Player player) {
+        player.setGameMode(GameMode.SPECTATOR);
+        player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Red")));
+    }
+
+    @Override
     public void onMove(PlayerMoveEvent event) {
         if (event.getPlayer().getGameMode() == GameMode.SPECTATOR) {
             return;
@@ -198,9 +270,34 @@ public class IngameState extends GameState {
         // Check if they wandered into a trap
         ArrayList<DroppableTrap> toRemove = new ArrayList<>();
         for (DroppableTrap trap : traps) {
-            if (trap.location.distance(event.getPlayer().getLocation()) <= 3 && !team.getName().equals(trap.team.getName())) {
-                toRemove.add(trap);
-                trap.onEnter(event.getPlayer());
+            if (trap.location.distance(event.getPlayer().getLocation()) <= 4 && !team.getName().equals(trap.team.getName())) {
+
+                // Make sure the trap is actually visible
+                final var toRaytrace = Arrays.asList(
+                        event.getPlayer().getLocation(), // Feet
+                        event.getPlayer().getLocation().clone().add(0, 1, 0), // Middle
+                        event.getPlayer().getLocation().clone().add(0, 2, 0) // Eyes
+                );
+
+                var found = false;
+                for(final var toTrace : toRaytrace) {
+                    final var direction = toTrace.clone().subtract(trap.location).toVector().normalize();
+                    final var distance = trap.location.distance(toTrace);
+                    final var result = trap.location.getWorld().rayTraceBlocks(trap.location, direction, distance, FluidCollisionMode.NEVER, true);
+
+                    if (result == null) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(found) {
+                    toRemove.add(trap);
+                    trap.doEffect(List.of(event.getPlayer()));
+                    for(var loc : trap.blocksToDelete()) {
+                        toDeleteAfter.put(loc, 120);
+                    }
+                }
                 break;
             }
         }
@@ -232,6 +329,13 @@ public class IngameState extends GameState {
         } else if(event.getEntity().getType() == EntityType.ARROW) {
             player.setCooldown(Material.CROSSBOW, ARROW_COOLDOWN);
             player.setCooldown(Material.BOW, ARROW_COOLDOWN);
+
+            if(currentArrowEffect.containsKey(player)) {
+                final var effect = currentArrowEffect.get(player);
+                event.getEntity().setMetadata("team", new FixedMetadataValue(Snowsplash.getInstance(), Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(player).getName()));
+                event.getEntity().setMetadata("effect", new FixedMetadataValue(Snowsplash.getInstance(), effect));
+                currentArrowEffect.remove(player);
+            }
         }
     }
 
@@ -334,13 +438,63 @@ public class IngameState extends GameState {
 
     @Override
     public void onProjectileHit(ProjectileHitEvent event) {
-        if(!(event.getEntity().getType() == EntityType.SNOWBALL)) return;
 
+        // Handle effect arrows
+        if(event.getEntity() instanceof Arrow arrow && arrow.hasMetadata("effect")) {
+            final var effect = arrow.getMetadata("effect").getFirst().asString();
+            final var location = event.getHitBlock() == null ? event.getHitEntity().getLocation() : event.getHitBlock().getLocation();
+            final var team = Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(arrow.getMetadata("team").getFirst().asString());
+
+            // Choose the correct trap for the arrow effect
+            DroppableTrap trap = null;
+            switch(effect) {
+                case "web" -> {
+                    trap = new WebTrap(location, team);
+                }
+                case "slowness" -> {
+                    trap = new SlowTrap(location, team);
+                }
+                case "explosion" -> {
+                    trap = new ExplosionTrap(location, team);
+                }
+                case "poison" -> {
+                    trap = new PoisonTrap(location, team);
+                }
+            }
+            assert(trap != null);
+
+            // Do the arrow effect
+            final var players = new ArrayList<LivingEntity>();
+            for(Entity entity : location.getNearbyEntities(3, 3, 3)) {
+                if(entity instanceof LivingEntity living) {
+                    if(entity instanceof Player player && trap.team.getPlayers().contains(player)) {
+                        continue;
+                    }
+
+                    players.add(living);
+                }
+            }
+
+            trap.doEffect(players);
+            for(var loc : trap.blocksToDelete()) {
+                toDeleteAfter.put(loc, 120);
+            }
+            return;
+        }
+
+        // Snowball handling
+        if(!(event.getEntity().getType() == EntityType.SNOWBALL)) return;
         if(event.getHitEntity() instanceof LivingEntity target) {
-            target.damage(SNOWBALL_DAMAGE);
+
+            // Make sure the player gets kill credit
+            if(event.getEntity().getShooter() instanceof Player shooter) {
+                target.damage(SNOWBALL_DAMAGE, shooter);
+            } else {
+                target.damage(SNOWBALL_DAMAGE);
+            }
 
             // Apply knockback similar to vanilla
-            if(target instanceof Player) {
+            if(target instanceof Player && !(event.getEntity().getShooter() instanceof Player)) {
                 Vector knockback = event.getEntity().getVelocity().normalize().multiply(0.5);
                 knockback.setY(0.4);
                 target.setVelocity(target.getVelocity().add(knockback));
@@ -376,13 +530,17 @@ public class IngameState extends GameState {
 
         public final Location location;
         public final Team team;
-        public final Item item;
-        public final long start;
+        public final Material material;
+        public Item item;
+        public long start;
 
         public DroppableTrap(Location location, Team team, Material material) {
             this.location = location;
             this.team = team;
+            this.material = material;
+        }
 
+        public void drop() {
             item = (Item) location.getWorld().spawnEntity(location.clone().add(0, 0.5, 0), EntityType.ITEM);
             item.setItemStack(new ItemStackBuilder(material).buildStack());
             item.setVelocity(new Vector(0, 0, 0));
@@ -393,7 +551,11 @@ public class IngameState extends GameState {
             start = System.currentTimeMillis();
         }
 
-        public abstract void onEnter(Player player);
+        public abstract void doEffect(List<LivingEntity> entities);
+
+        public List<Location> blocksToDelete() {
+            return List.of();
+        }
     }
 
     public static class SlowTrap extends DroppableTrap {
@@ -403,9 +565,11 @@ public class IngameState extends GameState {
         }
 
         @Override
-        public void onEnter(Player player) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 300, 4));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+        public void doEffect(List<LivingEntity> players) {
+            for(var player : players) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 300, 4));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+            }
         }
     }
 
@@ -416,35 +580,27 @@ public class IngameState extends GameState {
         }
 
         @Override
-        public void onEnter(Player player) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 2));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+        public void doEffect(List<LivingEntity> players) {
+            for(var player : players) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 2));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+            }
         }
     }
 
-    public static class FreezeTrap extends DroppableTrap {
+    public static class ExplosionTrap extends DroppableTrap {
 
-        FreezeTrap(Location location, Team team) {
-            super(location, team, Material.LIGHT_BLUE_DYE);
+        ExplosionTrap(Location location, Team team) {
+            super(location, team, Material.GUNPOWDER);
         }
 
         @Override
-        public void onEnter(Player player) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 255, true, false));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
-        }
-    }
+        public void doEffect(List<LivingEntity> players) {
+            location.getWorld().spawnEntity(location.clone().add(0, 1, 0), EntityType.TNT);
 
-    public static class FlyTrap extends DroppableTrap {
-
-        FlyTrap(Location location, Team team) {
-            super(location, team, Material.FEATHER);
-        }
-
-        @Override
-        public void onEnter(Player player) {
-            player.setVelocity(new Vector(0, 3, 0));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+            for(var player : players) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+            }
         }
     }
 
@@ -455,7 +611,8 @@ public class IngameState extends GameState {
         }
 
         @Override
-        public void onEnter(Player player) {
+        public void doEffect(List<LivingEntity> players) {
+
             // Place 5 blocks of webs around the location
             final var main = location.clone().getBlock();
             main.setType(Material.COBWEB);
@@ -463,7 +620,23 @@ public class IngameState extends GameState {
             main.getRelative(BlockFace.WEST).setType(Material.COBWEB);
             main.getRelative(BlockFace.NORTH).setType(Material.COBWEB);
             main.getRelative(BlockFace.SOUTH).setType(Material.COBWEB);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+
+            for(var player : players) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));
+            }
+        }
+
+        @Override
+        public List<Location> blocksToDelete() {
+            final var main = location.clone().getBlock();
+
+            return List.of(
+                    main.getLocation(),
+                    main.getRelative(BlockFace.EAST).getLocation(),
+                    main.getRelative(BlockFace.WEST).getLocation(),
+                    main.getRelative(BlockFace.NORTH).getLocation(),
+                    main.getRelative(BlockFace.SOUTH).getLocation()
+            );
         }
     }
 }

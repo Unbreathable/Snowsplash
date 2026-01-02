@@ -101,17 +101,20 @@ public class ItemShopScreen extends CScreen {
                 )
         ),
         ARROWS(
-                new ItemStackBuilder(Material.ARROW)
-                        .withName(Component.text("Arrows", NamedTextColor.GOLD, TextDecoration.BOLD))
-                        .withLore(Component.text("Effects for your arrows.", NamedTextColor.GRAY))
+                new ItemStackBuilder(Material.RED_DYE)
+                        .withName(Component.text("Effects", NamedTextColor.GOLD, TextDecoration.BOLD))
+                        .withLore(
+                                Component.text("Traps & arrow effects.", NamedTextColor.GRAY),
+                                Component.text("", NamedTextColor.GRAY),
+                                Component.text("Right click on block - Use as trap", NamedTextColor.GRAY),
+                                Component.text("Right click in the air - Use as arrow effect", NamedTextColor.GRAY)
+                        )
                         .buildStack(),
                 List.of(
-                        itemWithPrice(Material.FEATHER, "Flying", NamedTextColor.GOLD, 8, 1),
-                        itemWithPrice(Material.GRAY_DYE, "Slowness", NamedTextColor.GOLD, 8, 1),
-                        itemWithPrice(Material.RED_DYE, "Damage", NamedTextColor.GOLD, 8, 1),
-                        itemWithPrice(Material.GREEN_DYE, "Regeneration", NamedTextColor.GOLD, 8, 1),
-                        itemWithPrice(Material.GUNPOWDER, "Explosion", NamedTextColor.GOLD, 8, 1),
-                        itemWithPrice(Material.WHITE_DYE, "Web", NamedTextColor.GOLD, 8, 1)
+                        itemWithPrice(Material.GRAY_DYE, "Slowness", NamedTextColor.GOLD, 3, 1),
+                        itemWithPrice(Material.LIME_DYE, "Poison", NamedTextColor.GOLD, 4, 1),
+                        itemWithPrice(Material.WHITE_DYE, "Web", NamedTextColor.GOLD, 6, 1),
+                        itemWithPrice(Material.GUNPOWDER, "Explosion", NamedTextColor.GOLD, 10, 1)
                 )
         ),
         TOOLS(

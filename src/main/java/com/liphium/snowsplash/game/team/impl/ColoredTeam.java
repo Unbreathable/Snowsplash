@@ -74,9 +74,9 @@ public class ColoredTeam extends Team {
     public void handleWin() {
         Bukkit.broadcast(Component.text(" "));
         Bukkit.broadcast(Component.text("   ", NamedTextColor.GRAY)
-                .append(Component.text("Team ", this.getColor()))
-                .append(Component.text(this.getName(), this.getColor(), TextDecoration.BOLD))
-                .append(Component.text("won the ", NamedTextColor.GRAY))
+                .append(Component.text("Team", this.getColor())).appendSpace()
+                .append(Component.text(this.getName(), this.getColor(), TextDecoration.BOLD)).appendSpace()
+                .append(Component.text("won the", NamedTextColor.GRAY)).appendSpace()
                 .append(Component.text("game", this.getColor()))
                 .append(Component.text("!", NamedTextColor.GRAY)));
         Bukkit.broadcast(Component.text(" "));
