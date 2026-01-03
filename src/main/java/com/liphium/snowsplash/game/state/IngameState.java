@@ -37,7 +37,6 @@ public class IngameState extends GameState {
     private static final double SNOWMAN_HEALTH = 300;
     private static final int ICE_ON_DEATH = 2; // The amount of ice a player gets when they kill someone
 
-    private static final int SNOWBALL_TICKS = 1;
     private static final int SNOWBALL_COOLDOWN = 6; // Cooldown that is set when players use a snowball
     private static final double SNOWBALL_DAMAGE = 2.5;
 
@@ -98,7 +97,6 @@ public class IngameState extends GameState {
         // Start the game loop
         Snowsplash.getInstance().getTaskManager().inject(runnable = new Runnable() {
             int tickCount = 0;
-            int snowballCount = 0;
 
             @Override
             public void run() {
@@ -131,17 +129,6 @@ public class IngameState extends GameState {
                     }
 
                     Messages.actionBar(base);
-                }
-
-                // Give players snowballs every few ticks
-                if(snowballCount++ >= SNOWBALL_TICKS) {
-                    snowballCount = 0;
-
-                    for(Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
-                        for(Player player : team.getPlayers()) {
-                            player.getInventory().setItem(0, new ItemStackBuilder(Material.SNOWBALL).withAmount(16).buildStack());
-                        }
-                    }
                 }
 
                 // Delete all blocks that should be deleted
@@ -323,6 +310,8 @@ public class IngameState extends GameState {
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         if(event.getEntity().getShooter() == null || !(event.getEntity().getShooter() instanceof Player player)) return;
 
+        event.getEntity().setMetadata("team", new FixedMetadataValue(Snowsplash.getInstance(), Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(player).getName()));
+
         // Handle the snowball and arrow cooldowns
         if(event.getEntity().getType() == EntityType.SNOWBALL) {
             player.setCooldown(Material.SNOWBALL, SNOWBALL_COOLDOWN);
@@ -332,7 +321,6 @@ public class IngameState extends GameState {
 
             if(currentArrowEffect.containsKey(player)) {
                 final var effect = currentArrowEffect.get(player);
-                event.getEntity().setMetadata("team", new FixedMetadataValue(Snowsplash.getInstance(), Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(player).getName()));
                 event.getEntity().setMetadata("effect", new FixedMetadataValue(Snowsplash.getInstance(), effect));
                 currentArrowEffect.remove(player);
             }
@@ -341,7 +329,14 @@ public class IngameState extends GameState {
 
     @Override
     public void onEntityExplode(EntityExplodeEvent event) {
-        event.blockList().clear();
+        event.blockList().removeIf(block -> {
+            if(placedBlocks.containsKey(block.getLocation())) {
+                placedBlocks.remove(block.getLocation());
+                return false;
+            }
+
+            return true;
+        });
     }
 
     @Override
@@ -375,7 +370,7 @@ public class IngameState extends GameState {
         placedBlocks.put(event.getBlock().getLocation(), true);
     }
 
-    final List<Material> grassTypes = Arrays.asList(Material.TALL_GRASS, Material.SHORT_GRASS, Material.CORNFLOWER, Material.DANDELION, Material.POPPY, Material.BLUE_ORCHID, Material.ALLIUM, Material.AZURE_BLUET, Material.RED_TULIP, Material.ORANGE_TULIP, Material.WHITE_TULIP, Material.PINK_TULIP, Material.OXEYE_DAISY, Material.SUNFLOWER, Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.LILY_OF_THE_VALLEY, Material.WITHER_ROSE, Material.COBWEB, Material.FERN, Material.SWEET_BERRY_BUSH);
+    final List<Material> grassTypes = Arrays.asList(Material.TALL_GRASS, Material.SHORT_GRASS, Material.CORNFLOWER, Material.DANDELION, Material.POPPY, Material.BLUE_ORCHID, Material.ALLIUM, Material.AZURE_BLUET, Material.RED_TULIP, Material.ORANGE_TULIP, Material.WHITE_TULIP, Material.PINK_TULIP, Material.OXEYE_DAISY, Material.SUNFLOWER, Material.LILAC, Material.ROSE_BUSH, Material.PEONY, Material.LILY_OF_THE_VALLEY, Material.WITHER_ROSE, Material.COBWEB, Material.FERN, Material.SWEET_BERRY_BUSH, Material.SNOW, Material.DEAD_TUBE_CORAL, Material.DEAD_FIRE_CORAL);
 
     @Override
     public void onBreak(BlockBreakEvent event) {
@@ -485,6 +480,13 @@ public class IngameState extends GameState {
         // Snowball handling
         if(!(event.getEntity().getType() == EntityType.SNOWBALL)) return;
         if(event.getHitEntity() instanceof LivingEntity target) {
+            if(event.getEntity().hasMetadata("team") && target instanceof Player player) {
+                final var team = Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(event.getEntity().getMetadata("team").getFirst().asString());
+
+                if(Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(player).getName().equals(team.getName())) {
+                    return;
+                }
+            }
 
             // Make sure the player gets kill credit
             if(event.getEntity().getShooter() instanceof Player shooter) {

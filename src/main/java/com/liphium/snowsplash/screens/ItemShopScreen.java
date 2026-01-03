@@ -59,6 +59,20 @@ public class ItemShopScreen extends CScreen {
     }
 
     public enum ShopCategory {
+        WEAPONS(
+                new ItemStackBuilder(Material.IRON_SWORD)
+                        .withName(Component.text("Weapons", NamedTextColor.RED, TextDecoration.BOLD))
+                        .withLore(Component.text("Useful weapons.", NamedTextColor.GRAY))
+                        .buildStack(),
+                List.of(
+                        itemWithPrice(Material.STONE_SWORD, "Stone sword", NamedTextColor.RED, 4, 1),
+                        itemWithPrice(Material.IRON_SWORD, "Iron sword", NamedTextColor.RED, 10, 1),
+                        itemWithPrice(Material.DIAMOND_SWORD, "Diamond sword", NamedTextColor.RED, 20, 1),
+                        spacer(),
+                        itemWithPrice(Material.IRON_AXE, "Iron axe", NamedTextColor.RED, 15, 1),
+                        itemWithPrice(Material.DIAMOND_AXE, "Diamond axe", NamedTextColor.RED, 35, 1)
+                )
+        ),
         BOWS(
                 new ItemStackBuilder(Material.BOW)
                         .withName(Component.text("Bows", NamedTextColor.RED, TextDecoration.BOLD))
@@ -124,11 +138,9 @@ public class ItemShopScreen extends CScreen {
                         .buildStack(),
                 List.of(
                         itemWithPrice(Material.IRON_PICKAXE, "Iron pickaxe", NamedTextColor.AQUA, 4, 1),
-                        itemWithPrice(Material.IRON_AXE, "Iron axe", NamedTextColor.AQUA, 4, 1),
                         itemWithPrice(Material.IRON_SHOVEL, "Iron shovel", NamedTextColor.AQUA, 4, 1),
                         spacer(),
                         itemWithPrice(Material.DIAMOND_PICKAXE, "Diamond pickaxe", NamedTextColor.AQUA, 8, 1),
-                        itemWithPrice(Material.DIAMOND_AXE, "Diamond axe", NamedTextColor.AQUA, 8, 1),
                         itemWithPrice(Material.DIAMOND_SHOVEL, "Diamond shovel", NamedTextColor.AQUA, 8, 1)
                 )
         ),
@@ -144,6 +156,7 @@ public class ItemShopScreen extends CScreen {
                         itemWithPrice(Material.COBBLESTONE, "Cobblestone", NamedTextColor.WHITE, 8, 16),
                         spacer(),
                         itemWithPrice(Material.SPRUCE_BOAT, "Boat", NamedTextColor.WHITE, 4, 1),
+                        itemWithPrice(Material.SPRUCE_BOAT, "Snowballs", NamedTextColor.WHITE, 4, 16),
                         itemWithPrice(Material.TNT, "TNT", NamedTextColor.WHITE, 8, 1),
                         itemWithPrice(Material.GOLDEN_APPLE, "Golden apple", NamedTextColor.WHITE, 10, 1)
                 )

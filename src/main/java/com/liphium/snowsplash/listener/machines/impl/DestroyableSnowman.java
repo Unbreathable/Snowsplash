@@ -1,5 +1,6 @@
 package com.liphium.snowsplash.listener.machines.impl;
 
+import com.liphium.snowsplash.Snowsplash;
 import com.liphium.snowsplash.game.team.Team;
 import com.liphium.snowsplash.listener.machines.Machine;
 import net.kyori.adventure.text.Component;
@@ -9,6 +10,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.entity.Snowman;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
@@ -153,6 +155,9 @@ public class DestroyableSnowman extends Machine {
             .normalize();
         
         Snowball snowball = man.launchProjectile(Snowball.class, direction.multiply(1.5));
+
+        snowball.setMetadata("team", new FixedMetadataValue(Snowsplash.getInstance(), own.getName()));
+
         snowball.setShooter(man);
     }
 
