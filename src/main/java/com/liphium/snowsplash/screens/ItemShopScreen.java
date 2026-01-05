@@ -156,7 +156,7 @@ public class ItemShopScreen extends CScreen {
                         itemWithPrice(Material.COBBLESTONE, "Cobblestone", NamedTextColor.WHITE, 8, 16),
                         spacer(),
                         itemWithPrice(Material.SPRUCE_BOAT, "Boat", NamedTextColor.WHITE, 4, 1),
-                        itemWithPrice(Material.SPRUCE_BOAT, "Snowballs", NamedTextColor.WHITE, 4, 16),
+                        itemWithPrice(Material.SNOWBALL, "Snowballs", NamedTextColor.WHITE, 4, 16),
                         itemWithPrice(Material.TNT, "TNT", NamedTextColor.WHITE, 8, 1),
                         itemWithPrice(Material.GOLDEN_APPLE, "Golden apple", NamedTextColor.WHITE, 10, 1)
                 )
