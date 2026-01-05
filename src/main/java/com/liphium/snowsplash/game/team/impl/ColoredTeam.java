@@ -1,5 +1,6 @@
 package com.liphium.snowsplash.game.team.impl;
 
+import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.snowsplash.game.team.Team;
 import com.liphium.snowsplash.util.LocationAPI;
 import net.kyori.adventure.text.Component;
@@ -36,6 +37,7 @@ public class ColoredTeam extends Team {
         ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
         LeatherArmorMeta bootsMeta = (LeatherArmorMeta) boots.getItemMeta();
         if (bootsMeta != null) {
+            bootsMeta.setUnbreakable(true);
             bootsMeta.setColor(armorColor);
             boots.setItemMeta(bootsMeta);
         }
@@ -44,6 +46,7 @@ public class ColoredTeam extends Team {
         ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS);
         LeatherArmorMeta leggingsMeta = (LeatherArmorMeta) leggings.getItemMeta();
         if (leggingsMeta != null) {
+            leggingsMeta.setUnbreakable(true);
             leggingsMeta.setColor(armorColor);
             leggings.setItemMeta(leggingsMeta);
         }
@@ -51,6 +54,10 @@ public class ColoredTeam extends Team {
         // Equip the armor
         player.getInventory().setBoots(boots);
         player.getInventory().setLeggings(leggings);
+        if(!player.getInventory().contains(Material.WOODEN_SWORD)) {
+            player.getInventory().addItem(new ItemStackBuilder(Material.WOODEN_SWORD).makeUnbreakable().buildStack());
+            player.getInventory().addItem(new ItemStackBuilder(Material.WOODEN_AXE).makeUnbreakable().buildStack());
+        }
     }
 
     @Override
