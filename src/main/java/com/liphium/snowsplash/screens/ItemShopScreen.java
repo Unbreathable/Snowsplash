@@ -127,7 +127,6 @@ public class ItemShopScreen extends CScreen {
                 List.of(
                         itemWithPrice(Material.GRAY_DYE, "Slowness", NamedTextColor.GOLD, 3, 1),
                         itemWithPrice(Material.LIME_DYE, "Poison", NamedTextColor.GOLD, 4, 1),
-                        itemWithPrice(Material.WHITE_DYE, "Web", NamedTextColor.GOLD, 6, 1),
                         itemWithPrice(Material.GUNPOWDER, "Explosion", NamedTextColor.GOLD, 10, 1)
                 )
         ),
@@ -156,9 +155,8 @@ public class ItemShopScreen extends CScreen {
                         itemWithPrice(Material.COBBLESTONE, "Cobblestone", NamedTextColor.WHITE, 8, 16),
                         spacer(),
                         itemWithPrice(Material.SPRUCE_BOAT, "Boat", NamedTextColor.WHITE, 4, 1),
-                        itemWithPrice(Material.SNOWBALL, "Snowballs", NamedTextColor.WHITE, 4, 16),
                         itemWithPrice(Material.TNT, "TNT", NamedTextColor.WHITE, 8, 1),
-                        itemWithPrice(Material.GOLDEN_APPLE, "Golden apple", NamedTextColor.WHITE, 10, 1)
+                        itemWithPrice(Material.GOLDEN_APPLE, "Golden apple", NamedTextColor.WHITE, 3, 1)
                 )
         );
 
@@ -194,12 +192,7 @@ public class ItemShopScreen extends CScreen {
 
         public static void buyFunction(CClickEvent event, ItemStack stack, int price) {
             // Get the amount of pumpkins in the inventory
-            int count = 0;
-            for (ItemStack item : event.player().getInventory()) {
-                if (item != null && item.getType() == Material.BLUE_ICE) {
-                    count += item.getAmount();
-                }
-            }
+            int count = countMaterial(event.player(), Material.BLUE_ICE);
 
             if (count < price) {
                 event.player().sendMessage(Snowsplash.PREFIX.append(Component.text("You don't have enough Blue Ice to purchase this item.", NamedTextColor.RED)));
@@ -212,5 +205,15 @@ public class ItemShopScreen extends CScreen {
 
             event.player().getInventory().addItem(stack);
         }
+    }
+
+    public static int countMaterial(Player player, Material material) {
+        int count = 0;
+        for (ItemStack item : player.getInventory()) {
+            if (item != null && item.getType() == material) {
+                count += item.getAmount();
+            }
+        }
+        return count;
     }
 }

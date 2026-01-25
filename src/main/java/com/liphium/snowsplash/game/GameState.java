@@ -1,5 +1,6 @@
 package com.liphium.snowsplash.game;
 
+import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -42,6 +43,9 @@ public abstract class GameState {
     }
 
     public void onDamageByEntity(EntityDamageByEntityEvent event) {
+    }
+
+    public void onKnockbackByEntity(EntityKnockbackByEntityEvent event) {
     }
 
     public void onPlace(BlockPlaceEvent event) {

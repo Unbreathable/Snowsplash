@@ -1,5 +1,6 @@
 package com.liphium.snowsplash.listener;
 
+import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent;
 import com.liphium.snowsplash.Snowsplash;
 import com.liphium.snowsplash.game.state.LobbyState;
 import org.bukkit.block.data.type.Snow;
@@ -99,5 +100,10 @@ public class GameListener implements Listener {
     @EventHandler
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         Snowsplash.getInstance().getGameManager().getCurrentState().onProjectileLaunch(event);
+    }
+
+    @EventHandler
+    public void onKnockbackByEntity(EntityKnockbackByEntityEvent event) {
+        Snowsplash.getInstance().getGameManager().getCurrentState().onKnockbackByEntity(event);
     }
 }

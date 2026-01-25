@@ -3,6 +3,7 @@ package com.liphium.snowsplash.listener.machines;
 import com.liphium.snowsplash.listener.machines.impl.*;
 import com.liphium.snowsplash.util.LocationAPI;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
@@ -72,7 +73,7 @@ public class MachineManager {
 
     public Machine newMachineByLocation(String name, Location location) {
         return switch (name) {
-            case "IceDropper" -> new ItemDropper(location, "Ice", NamedTextColor.AQUA, new ItemStack(Material.BLUE_ICE), 12);
+            case "IceDropper" -> new ItemDropper(location, "Ice", NamedTextColor.AQUA, new ItemStack(Material.BLUE_ICE), () -> Math.max(14 - Bukkit.getOnlinePlayers().size(), 4));
             case "ItemShop" -> new ItemShop(location);
             default -> null;
         };

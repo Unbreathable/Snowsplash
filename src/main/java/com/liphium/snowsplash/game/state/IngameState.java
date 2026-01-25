@@ -1,5 +1,6 @@
 package com.liphium.snowsplash.game.state;
 
+import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent;
 import com.liphium.core.util.ItemStackBuilder;
 import com.liphium.snowsplash.Snowsplash;
 import com.liphium.snowsplash.game.GameState;
@@ -37,6 +38,7 @@ public class IngameState extends GameState {
     private static final double SNOWMAN_HEALTH = 300;
     private static final int ICE_ON_DEATH = 2; // The amount of ice a player gets when they kill someone
 
+    private static final int SNOWBALL_TICKS = 1;
     private static final int SNOWBALL_COOLDOWN = 6; // Cooldown that is set when players use a snowball
     private static final double SNOWBALL_DAMAGE = 2.5;
 
@@ -64,9 +66,17 @@ public class IngameState extends GameState {
         world.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, false);
         world.setGameRule(GameRules.ADVANCE_TIME, false);
         world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+        world.setGameRule(GameRules.LOCATOR_BAR, false);
         world.setGameRule(GameRules.KEEP_INVENTORY, true);
         world.setDifficulty(Difficulty.EASY);
 
+        ArrayList<Player> playersWithOutTeam = new ArrayList<>(Bukkit.getOnlinePlayers());
+        playersWithOutTeam.removeIf(x -> Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(x) != null);
+
+        for (Player player : playersWithOutTeam) {
+            Team team = Snowsplash.getInstance().getGameManager().getTeamManager().getTeamWithLeastPlayers();
+            team.join(player);
+        }
 
         // World cleanup
         for (Entity entity : Objects.requireNonNull(Bukkit.getWorld(Snowsplash.GAME_WORLD)).getEntities()) {
@@ -97,6 +107,7 @@ public class IngameState extends GameState {
         // Start the game loop
         Snowsplash.getInstance().getTaskManager().inject(runnable = new Runnable() {
             int tickCount = 0;
+            int snowballCount = 0;
 
             @Override
             public void run() {
@@ -131,6 +142,17 @@ public class IngameState extends GameState {
                     Messages.actionBar(base);
                 }
 
+                // Give players snowballs every few ticks
+                if(snowballCount++ >= SNOWBALL_TICKS) {
+                    snowballCount = 0;
+
+                    for(Team team : Snowsplash.getInstance().getGameManager().getTeamManager().getTeams()) {
+                        for(Player player : team.getPlayers()) {
+                            player.getInventory().setItemInOffHand(new ItemStackBuilder(Material.SNOWBALL).withAmount(16).buildStack());
+                        }
+                    }
+                }
+
                 // Delete all blocks that should be deleted
                 final var newMap = new HashMap<Location, Integer>();
                 for(var entry : toDeleteAfter.entrySet()) {
@@ -162,6 +184,11 @@ public class IngameState extends GameState {
             DroppableTrap trapToPlace = null;
             switch(usedItem.getType()) {
                 case Material.GRAY_DYE -> {
+                    if(event.getClickedBlock() == null && currentArrowEffect.containsKey(event.getPlayer())) {
+                        event.getPlayer().sendMessage(Snowsplash.PREFIX.append(Component.text("You already have an arrow effect equipped.", NamedTextColor.RED)));
+                        return;
+                    }
+
                     hit = true;
                     reduceMainHandItem(event.getPlayer(), Material.GRAY_DYE);
                     if(event.getClickedBlock() == null) {
@@ -171,6 +198,11 @@ public class IngameState extends GameState {
                     }
                 }
                 case Material.LIME_DYE -> {
+                    if(event.getClickedBlock() == null && currentArrowEffect.containsKey(event.getPlayer())) {
+                        event.getPlayer().sendMessage(Snowsplash.PREFIX.append(Component.text("You already have an arrow effect equipped.", NamedTextColor.RED)));
+                        return;
+                    }
+
                     hit = true;
                     reduceMainHandItem(event.getPlayer(), Material.LIME_DYE);
                     if(event.getClickedBlock() == null) {
@@ -180,6 +212,11 @@ public class IngameState extends GameState {
                     }
                 }
                 case Material.GUNPOWDER -> {
+                    if(event.getClickedBlock() == null && currentArrowEffect.containsKey(event.getPlayer())) {
+                        event.getPlayer().sendMessage(Snowsplash.PREFIX.append(Component.text("You already have an arrow effect equipped.", NamedTextColor.RED)));
+                        return;
+                    }
+
                     hit = true;
                     reduceMainHandItem(event.getPlayer(), Material.GUNPOWDER);
                     if(event.getClickedBlock() == null) {
@@ -189,6 +226,11 @@ public class IngameState extends GameState {
                     }
                 }
                 case Material.WHITE_DYE -> {
+                    if(event.getClickedBlock() == null && currentArrowEffect.containsKey(event.getPlayer())) {
+                        event.getPlayer().sendMessage(Snowsplash.PREFIX.append(Component.text("You already have an arrow effect equipped.", NamedTextColor.RED)));
+                        return;
+                    }
+
                     hit = true;
                     reduceMainHandItem(event.getPlayer(), Material.WHITE_DYE);
                     if(event.getClickedBlock() == null) {
@@ -242,8 +284,7 @@ public class IngameState extends GameState {
 
     @Override
     public void join(Player player) {
-        player.setGameMode(GameMode.SPECTATOR);
-        player.teleport(Objects.requireNonNull(LocationAPI.getLocation("Red")));
+        player.kick(Component.text("You can only join after the game has finished.", NamedTextColor.RED));
     }
 
     @Override
@@ -296,12 +337,23 @@ public class IngameState extends GameState {
 
     @Override
     public void onDamage(EntityDamageEvent event) {
-        event.setCancelled(false);
+        if (event.getEntity().getType() == EntityType.ITEM) {
+            event.setCancelled(true);
+        } else {
+            event.setCancelled(false);
+        }
     }
 
     @Override
     public void onDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getEntity().getType() == EntityType.ARMOR_STAND) {
+        if (event.getEntity().getType() == EntityType.ARMOR_STAND || event.getEntity().getType() == EntityType.ITEM) {
+            event.setCancelled(true);
+        }
+    }
+
+    @Override
+    public void onKnockbackByEntity(EntityKnockbackByEntityEvent event) {
+        if(event.getEntity().getType() == EntityType.ITEM) {
             event.setCancelled(true);
         }
     }
@@ -404,11 +456,18 @@ public class IngameState extends GameState {
         event.setKeepLevel(true);
 
         if (player.getKiller() != null) {
+
+            /*
+            // Give blue ice to the other person
+            final int blueIce = ItemShopScreen.countMaterial(event.getPlayer(), Material.BLUE_ICE);
+            player.getInventory().remove(Material.BLUE_ICE);
+            player.getKiller().give(new ItemStack(Material.BLUE_ICE, blueIce));
+             */
+
             Bukkit.broadcast(Snowsplash.PREFIX.append(Component.text(player.getName(), NamedTextColor.AQUA)
                     .append(Component.text(" was killed by ", NamedTextColor.GRAY))
                     .append(Component.text(player.getKiller().getName(), NamedTextColor.AQUA, TextDecoration.BOLD))
                     .append(Component.text("!", NamedTextColor.GRAY))));
-            player.getKiller().getInventory().addItem(new ItemStackBuilder(Material.BLUE_ICE).withAmount(ICE_ON_DEATH).buildStack());
         } else {
             Bukkit.broadcast(Snowsplash.PREFIX
                     .append(Component.text(player.getName(), NamedTextColor.AQUA, TextDecoration.BOLD))
@@ -439,6 +498,7 @@ public class IngameState extends GameState {
             final var effect = arrow.getMetadata("effect").getFirst().asString();
             final var location = event.getHitBlock() == null ? event.getHitEntity().getLocation() : event.getHitBlock().getLocation();
             final var team = Snowsplash.getInstance().getGameManager().getTeamManager().getTeam(arrow.getMetadata("team").getFirst().asString());
+            arrow.removeMetadata("effect", Snowsplash.getInstance());
 
             // Choose the correct trap for the arrow effect
             DroppableTrap trap = null;
@@ -598,7 +658,7 @@ public class IngameState extends GameState {
 
         @Override
         public void doEffect(List<LivingEntity> players) {
-            location.getWorld().spawnEntity(location.clone().add(0, 1, 0), EntityType.TNT);
+            location.getWorld().spawnEntity(location.clone().add(-0.5, 1, -0.5), EntityType.TNT);
 
             for(var player : players) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0));

@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class ItemDropper extends Machine {
 
@@ -18,16 +19,16 @@ public class ItemDropper extends Machine {
     private final String name;
     private final NamedTextColor color;
     private final ItemStack toDrop;
-    private final int dropRate;
+    private final Supplier<Integer>  dropRate;
 
-    public ItemDropper(Location location, String name, NamedTextColor color, ItemStack toDrop, int ticks) {
+    public ItemDropper(Location location, String name, NamedTextColor color, ItemStack toDrop, Supplier<Integer> ticks) {
         super(location, true);
 
         this.name = name;
         this.color = color;
         this.toDrop = toDrop;
         this.dropRate = ticks;
-        count = ticks;
+        count = ticks.get();
 
         ArmorStand stand = location.getWorld().spawn(location.clone().add(0, -1, 0), ArmorStand.class);
 
@@ -60,7 +61,7 @@ public class ItemDropper extends Machine {
             stand.customName(Component.text(name, color).appendSpace().append(Component.text("in", NamedTextColor.GRAY)).appendSpace().append(Component.text(count, color, TextDecoration.BOLD)).appendSpace().append(Component.text("..", NamedTextColor.GRAY)));
 
             if (count == 0) {
-                count = dropRate;
+                count = dropRate.get();
 
                 Item item = location.getWorld().dropItem(location.clone().add(0.5, 1.5, 0.5), toDrop);
                 item.setVelocity(new Vector());

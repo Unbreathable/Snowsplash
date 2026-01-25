@@ -28,6 +28,21 @@ public class TeamManager {
         return null;
     }
 
+    public Team getTeamWithLeastPlayers() {
+        Team currentTeam = null;
+        for (Team team : teams) {
+            if(currentTeam == null) {
+                currentTeam = team;
+            }
+
+            if(currentTeam.getPlayers().size() > team.getPlayers().size()) {
+                currentTeam = team;
+            }
+        }
+
+        return currentTeam;
+    }
+
     public Team getTeam(Player player) {
         for (Team team : teams) {
             if (team.getPlayers().contains(player)) {
